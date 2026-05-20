@@ -4,30 +4,12 @@ import { header, success, warn, error, loading } from '../../utils/exec.js'
 export async function installCodegraph(options = {}) {
   if (!options.skipHeader) header('Installing codegraph')
 
-  loading('installing codegraph globally...')
+  loading('configuring codegraph for opencode (project-local)...')
 
   try {
-    const installResult = await execa('npm', ['install', '-g', '@colbymchenry/codegraph'], {
-      reject: false,
-      stdio: 'pipe',
-    })
-
-    if (installResult.exitCode !== 0) {
-      warn('codegraph global install exited with non-zero code')
-      return { optedIn: true, installed: false }
-    }
-    success('codegraph installed globally')
-  } catch (err) {
-    error(`Failed to install codegraph: ${err.message}`)
-    return { optedIn: true, installed: false }
-  }
-
-  loading('configuring codegraph for opencode...')
-
-  try {
-    const configResult = await execa(
-      'codegraph',
-      ['install', '--target=opencode', '--location=local', '--yes'],
+    const installResult = await execa(
+      'npx',
+      ['@colbymchenry/codegraph', 'install', '--target=opencode', '--location=local', '--yes'],
       {
         cwd: process.cwd(),
         reject: false,
@@ -35,13 +17,13 @@ export async function installCodegraph(options = {}) {
       }
     )
 
-    if (configResult.exitCode !== 0) {
-      warn('codegraph install config exited with non-zero code')
+    if (installResult.exitCode !== 0) {
+      warn('codegraph install exited with non-zero code')
       return { optedIn: true, installed: false }
     }
     success('codegraph configured for opencode (project-local)')
   } catch (err) {
-    error(`Failed to configure codegraph: ${err.message}`)
+    error(`Failed to install codegraph: ${err.message}`)
     return { optedIn: true, installed: false }
   }
 
