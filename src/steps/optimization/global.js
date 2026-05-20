@@ -9,7 +9,8 @@ const RTK_END = '<!-- OB-RTK-END -->'
 const CAVEMAN_START = '<!-- OB-CAVEMAN-START -->'
 const CAVEMAN_END = '<!-- OB-CAVEMAN-END -->'
 
-function relRoot(cwd, abs) {
+const CODEGRAPH_START = '<!-- OB-CODEGRAPH-START -->'
+const CODEGRAPH_END = '<!-- OB-CODEGRAPH-END -->'
   const rel = path.relative(cwd, abs).replace(/\\/g, '/')
   return rel || '.'
 }
@@ -34,7 +35,25 @@ function buildCavemanSection(cavemanEnabled) {
   return `## Caveman\n\ncaveman mode. Active now. Every response. No revert unless user asks "stop caveman" or "normal mode".`
 }
 
-function replaceBetween(content, start, end, replacement) {
+function buildCodegraphSection(codegraphEnabled) {
+  if (!codegraphEnabled) return 'Codegraph was not selected during onboarding. Use standard grep/glob/read for code exploration.'
+  return `## CodeGraph
+
+This project has CodeGraph initialized (\`.codegraph/\` exists). Use it for all code exploration.
+
+**NEVER call \`codegraph_explore\` or \`codegraph_context\` directly in the main session** — these return large source payloads that fill context. Instead, ALWAYS spawn an Explore sub-agent for exploration questions ("how does X work?", "where is Y implemented?").
+
+When spawning Explore agents, include in the prompt:
+> This project has CodeGraph initialized. Use \`codegraph_explore\` as your PRIMARY tool. Do NOT re-read files that codegraph_explore already returned. Only fall back to grep/glob/read for files listed under "Additional relevant files".
+
+**The main session may only use these lightweight tools directly** (targeted lookups before edits):
+- \`codegraph_search\` — find symbols by name
+- \`codegraph_callers\` / \`codegraph_callees\` — trace call flow
+- \`codegraph_impact\` — check what's affected before editing
+- \`codegraph_node\` — get a single symbol's details`
+}
+
+
   if (!content.includes(start) || !content.includes(end)) return content
   const pattern = new RegExp(`${start}[\\s\\S]*?${end}`)
   return content.replace(pattern, `${start}\n${replacement.trim()}\n${end}`)
@@ -52,11 +71,13 @@ export async function configureObGlobal(ctx = {}, tokenOpt = {}) {
   const sourceRootsSection = buildSourceRootsSection(ctx.sourceRoots, cwd)
   const rtkSection = buildRtkSection(!!tokenOpt?.rtk?.optedIn)
   const cavemanSection = buildCavemanSection(!!tokenOpt?.caveman?.optedIn)
+  const codegraphSection = buildCodegraphSection(!!tokenOpt?.codegraph?.optedIn)
 
   let content = await fse.readFile(skillPath, 'utf-8')
   content = replaceBetween(content, SOURCE_START, SOURCE_END, sourceRootsSection)
   content = replaceBetween(content, RTK_START, RTK_END, rtkSection)
   content = replaceBetween(content, CAVEMAN_START, CAVEMAN_END, cavemanSection)
+  content = replaceBetween(content, CODEGRAPH_START, CODEGRAPH_END, codegraphSection)
   await fse.writeFile(skillPath, `${content.replace(/\s*$/, '')}\n`, 'utf-8')
   info('Configured ob-global from onboarding selections')
   success('ob-global skill updated')

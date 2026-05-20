@@ -17,6 +17,11 @@
       "name": "caveman concise mode (recommended)",
       "value": "caveman",
       "checked": true
+    },
+    {
+      "name": "codegraph semantic index (recommended)",
+      "value": "codegraph",
+      "checked": true
     }
   ]
 }

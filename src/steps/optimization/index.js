@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import { code, commandExists, header, info, loading, success, warn } from '../../utils/exec.js'
 import { installQuota } from './quota.js'
 import { installCaveman } from './caveman.js'
+import { installCodegraph } from './codegraph.js'
 import { enableCavemanGuidance } from './caveman-guidance.js'
 import { configureObGlobal } from './global.js'
 
@@ -92,10 +93,14 @@ export async function tokenOptimizationStep(options = {}) {
     ? await enableCavemanGuidance(caveman)
     : { enabled: false }
 
-  const obGlobal = await configureObGlobal(options.ctx || {}, { rtk, quota, caveman, cavemanGuidance })
+  const codegraph = has('codegraph')
+    ? await installCodegraph({ skipHeader: true })
+    : { optedIn: false, installed: false }
+
+  const obGlobal = await configureObGlobal(options.ctx || {}, { rtk, quota, caveman, cavemanGuidance, codegraph })
 
   if (selected.length === 0) warn('No token optimization tools selected')
   else success('Token optimization step completed')
 
-  return { rtk, quota, caveman, cavemanGuidance, obGlobal }
+  return { rtk, quota, caveman, cavemanGuidance, codegraph, obGlobal }
 }

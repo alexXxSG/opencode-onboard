@@ -82,3 +82,7 @@ RTK rules are generated here when RTK is selected during onboarding.
 <!-- OB-CAVEMAN-START -->
 Caveman rules are generated here when Caveman is selected during onboarding.
 <!-- OB-CAVEMAN-END -->
+
+<!-- OB-CODEGRAPH-START -->
+Codegraph rules are generated here when codegraph is selected during onboarding.
+<!-- OB-CODEGRAPH-END -->

@@ -17,6 +17,7 @@ vi.mock('../../utils/exec.js', () => ({
 
 vi.mock('./quota.js', () => ({ installQuota: vi.fn() }))
 vi.mock('./caveman.js', () => ({ installCaveman: vi.fn() }))
+vi.mock('./codegraph.js', () => ({ installCodegraph: vi.fn() }))
 vi.mock('./caveman-guidance.js', () => ({ enableCavemanGuidance: vi.fn() }))
 vi.mock('./global.js', () => ({ configureObGlobal: vi.fn() }))
 
@@ -30,6 +31,7 @@ vi.mock('fs-extra', () => ({
         { value: 'rtk', checked: false },
         { value: 'quota', checked: false },
         { value: 'caveman', checked: false },
+        { value: 'codegraph', checked: false },
       ],
     }),
   },
@@ -39,6 +41,7 @@ import { checkbox } from '@inquirer/prompts'
 import { commandExists, warn } from '../../utils/exec.js'
 import { installQuota } from './quota.js'
 import { installCaveman } from './caveman.js'
+import { installCodegraph } from './codegraph.js'
 import { enableCavemanGuidance } from './caveman-guidance.js'
 import { configureObGlobal } from './global.js'
 import { tokenOptimizationStep } from './index.js'
@@ -52,10 +55,11 @@ describe('tokenOptimizationStep()', () => {
     const originalIsTTY = process.stdin.isTTY
     Object.defineProperty(process.stdin, 'isTTY', { value: true, configurable: true })
 
-    checkbox.mockResolvedValue(['rtk', 'quota', 'caveman'])
+    checkbox.mockResolvedValue(['rtk', 'quota', 'caveman', 'codegraph'])
     commandExists.mockResolvedValue(true)
     installQuota.mockResolvedValue({ optedIn: true, installed: true })
     installCaveman.mockResolvedValue({ optedIn: true, installed: true })
+    installCodegraph.mockResolvedValue({ optedIn: true, installed: true })
     enableCavemanGuidance.mockResolvedValue({ enabled: true })
     configureObGlobal.mockResolvedValue({ configured: true })
 
@@ -66,12 +70,14 @@ describe('tokenOptimizationStep()', () => {
     expect(commandExists).toHaveBeenCalledWith('rtk')
     expect(installQuota).toHaveBeenCalledWith({ skipHeader: true, skipPrompt: true })
     expect(installCaveman).toHaveBeenCalledWith({ skipHeader: true, skipPrompt: true })
+    expect(installCodegraph).toHaveBeenCalledWith({ skipHeader: true })
     expect(enableCavemanGuidance).toHaveBeenCalledWith({ optedIn: true, installed: true })
     expect(configureObGlobal).toHaveBeenCalled()
     expect(result.rtk.available).toBe(true)
     expect(result.quota.installed).toBe(true)
     expect(result.caveman.installed).toBe(true)
     expect(result.cavemanGuidance.enabled).toBe(true)
+    expect(result.codegraph.installed).toBe(true)
   })
 
   it('skips all tools when nothing is selected', async () => {
@@ -82,6 +88,7 @@ describe('tokenOptimizationStep()', () => {
     expect(commandExists).not.toHaveBeenCalled()
     expect(installQuota).not.toHaveBeenCalled()
     expect(installCaveman).not.toHaveBeenCalled()
+    expect(installCodegraph).not.toHaveBeenCalled()
     expect(enableCavemanGuidance).not.toHaveBeenCalled()
     expect(configureObGlobal).toHaveBeenCalled()
     expect(warn).toHaveBeenCalledWith('No token optimization tools selected')
@@ -89,5 +96,6 @@ describe('tokenOptimizationStep()', () => {
     expect(result.quota.optedIn).toBe(false)
     expect(result.caveman.optedIn).toBe(false)
     expect(result.cavemanGuidance.enabled).toBe(false)
+    expect(result.codegraph.optedIn).toBe(false)
   })
 })
