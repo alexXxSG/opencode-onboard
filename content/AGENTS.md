@@ -65,9 +65,11 @@ The output must be a real, populated `ARCHITECTURE.md` based on what you found i
 
 ### Step 4, Populate OpenSpec config
 
-Read `openspec/config.yaml`. It contains a template with commented-out examples. Fill in the `context:` field with real project information discovered during steps 1-3:
+Write `openspec/config.yaml` with the real project information discovered during steps 1-3. Overwrite whatever is currently in the file. The output must contain `schema: spec-driven` and a populated `context:` block. Do not leave placeholder text.
 
 ```yaml
+schema: spec-driven
+
 context: |
   Tech stack: <languages, frameworks, libraries found in the codebase>
   Build system: <build tools, package managers>
@@ -76,7 +78,7 @@ context: |
   Domain: <what this project does, in one line>
 ```
 
-Keep the `schema: spec-driven` line. Add `rules:` only if the codebase has clear conventions worth enforcing (e.g., max task size, proposal format). Do not invent rules that aren't evidenced by the codebase.
+Replace every `<…>` with real values from the codebase. Add a `rules:` section only if the codebase has clear conventions worth enforcing (e.g., max task size, proposal format). Do not invent rules that aren't evidenced by the codebase.
 
 ---
 

@@ -7,6 +7,19 @@ export async function initOpenspec() {
   header('Step 6, Initializing OpenSpec');
 
   try {
+    const installResult = await execa('npm', ['install', '-g', '@fission-ai/openspec@latest'], {
+      cwd: process.cwd(),
+      stdio: 'pipe',
+      reject: false,
+    });
+
+    if (installResult.exitCode === 0) success('@fission-ai/openspec installed globally');
+    else warn('@fission-ai/openspec global install exited with non-zero code');
+  } catch (err) {
+    error(`Failed to install @fission-ai/openspec globally: ${err.message}`);
+  }
+
+  try {
     const result = await execa('npx', ['@fission-ai/openspec', 'init', '--tools', 'opencode', '--force'], {
       cwd: process.cwd(),
       stdio: 'pipe',
