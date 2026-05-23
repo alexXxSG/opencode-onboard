@@ -63,11 +63,13 @@ az repos pr work-item add --id {pr-id} --work-items {workitem-id}
 ### Step 6: Post screenshot comment
 
 Build raw URL for each image:
+
 ```
 https://dev.azure.com/{org}/{project}/_apis/git/repositories/{repo}/items?path=openspec/changes/{change}/images/{file}.png&versionType=branch&version={branch}&api-version=7.1
 ```
 
 Post via:
+
 ```bash
 az devops invoke \
   --area git --resource pullRequestThreads \
@@ -76,13 +78,16 @@ az devops invoke \
 ```
 
 `body.json`:
+
 ```json
 {
-  "comments": [{
-    "parentCommentId": 0,
-    "content": "## Screenshots\n\n![{feature}]({raw-url})",
-    "commentType": 1
-  }],
+  "comments": [
+    {
+      "parentCommentId": 0,
+      "content": "## Screenshots\n\n![{feature}]({raw-url})",
+      "commentType": 1
+    }
+  ],
   "status": "active"
 }
 ```
@@ -96,6 +101,7 @@ Triggered when user says "I've added comments to the PR" or "check PR feedback".
 ### Step 1: Find PRs
 
 If PR link provided, extract ID from URL. Otherwise:
+
 ```bash
 az repos pr list --repository {repo} --status active --top 1
 ```
@@ -111,12 +117,12 @@ az devops invoke \
 
 ### Step 3: Categorize feedback
 
-| Category | Description | Action |
-|----------|-------------|--------|
+| Category      | Description                         | Action                              |
+| ------------- | ----------------------------------- | ----------------------------------- |
 | `code-change` | Reviewer requests code modification | Return to lead to spawn specialists |
-| `spec-update` | Affects proposal, design, or tasks | Update openspec artifacts |
-| `question` | Reviewer asks a question | Reply with answer |
-| `resolved` | Thread already resolved | Skip |
+| `spec-update` | Affects proposal, design, or tasks  | Update openspec artifacts           |
+| `question`    | Reviewer asks a question            | Reply with answer                   |
+| `resolved`    | Thread already resolved             | Skip                                |
 
 ### Step 4: Update openspec (if spec-update)
 
@@ -137,16 +143,18 @@ az devops invoke \
 ```
 
 `reply.json`:
+
 ```json
 {
-  "comments": [{
-    "parentCommentId": 1,
-    "content": "Acknowledged, applying this change now.",
-    "commentType": 1
-  }]
+  "comments": [
+    {
+      "parentCommentId": 1,
+      "content": "Acknowledged, applying this change now.",
+      "commentType": 1
+    }
+  ]
 }
 ```
-
 ---
 
 ## Guardrails

@@ -40,7 +40,7 @@ Save to: `openspec/changes/{change-name}/images/{feature}.png`
 ```bash
 git add .
 git commit -m "feat(#{id}): {description}"
-git push origin feature/{slug}
+git push origin feature/{id}-{slug}
 ```
 
 ### Step 4: Create PR
@@ -48,24 +48,27 @@ git push origin feature/{slug}
 ```bash
 gh pr create \
   --base main \
-  --head feature/{slug} \
-  --title "feat: {title}" \
+  --head feature/{id}-{slug} \
+  --title "feat(#{id}): {title}" \
   --body "{description}"
 ```
 
 ### Step 5: Post screenshot comment
 
 Resolve commit SHA (the commit that includes screenshots):
+
 ```bash
 git rev-parse HEAD
 ```
 
 Build blob URL for each image (preferred, stable in PR discussion):
+
 ```
 https://github.com/{owner}/{repo}/blob/{sha}/openspec/changes/{change}/images/{file}.png
 ```
 
 Post comment:
+
 ```bash
 gh pr comment {pr-number} --repo {owner}/{repo} --body $'## Screenshots\n\n![{feature}]({blob-url})'
 ```
@@ -79,6 +82,7 @@ Triggered when user says "I've added comments to the PR" or "check PR feedback".
 ### Step 1: Find PRs
 
 If PR link provided, extract number from URL. Otherwise:
+
 ```bash
 gh pr list --repo {owner}/{repo} --state open --limit 1
 ```
@@ -94,12 +98,12 @@ gh api repos/{owner}/{repo}/pulls/{pr-number}/reviews
 
 ### Step 3: Categorize feedback
 
-| Category | Description | Action |
-|----------|-------------|--------|
+| Category      | Description                         | Action                              |
+| ------------- | ----------------------------------- | ----------------------------------- |
 | `code-change` | Reviewer requests code modification | Return to lead to spawn specialists |
-| `spec-update` | Affects proposal, design, or tasks | Update openspec artifacts |
-| `question` | Reviewer asks a question | Reply with answer |
-| `resolved` | Thread already resolved | Skip |
+| `spec-update` | Affects proposal, design, or tasks  | Update openspec artifacts           |
+| `question`    | Reviewer asks a question            | Reply with answer                   |
+| `resolved`    | Thread already resolved             | Skip                                |
 
 ### Step 4: Update openspec (if spec-update)
 
