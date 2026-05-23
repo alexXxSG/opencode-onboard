@@ -12,58 +12,69 @@ import {
 } from "../../utils/exec.js"
 import { APPLY_TARGETS, patchApplyFile } from "./ensemble.js"
 
+export const openspecSteps = {
+  check,
+  install,
+  init,
+  patch,
+}
+
 export async function initOpenspec() {
   header("Step 6, Initializing OpenSpec")
 
-  const openSpec = await install()
+  let openSpec = await openspecSteps.check()
+  if (!openSpec.available) {
+    await openspecSteps.install()
+  }
+
+  openSpec = await openspecSteps.check()
   if (!openSpec.available) {
     warn("OpenSpec has not been installed. It is required to create changes.")
-    return {...openSpec, initialized: false, patched: false }
+    return { ...openSpec, initialized: false, patched: false }
   }
 
-  const initResult = await init()
-  if(!initResult.initialized) {
-    warn("OpenSpec has not been initialized. It is required to create changes.")
-    return {...openSpec, initialized: false, patched: false }
+  const initResult = await openspecSteps.init()
+  if (!initResult.initialized) {
+    warn(
+      "OpenSpec has not been initialized. It is required to create changes.",
+    )
+    return { ...openSpec, initialized: false, patched: false }
   }
 
-  const patchesResult = await patch()
-  return { ...openSpec, initialized: true, patched: patchesResult.success }
+  const patchesResult = await openspecSteps.patch()
+  return {
+    ...openSpec,
+    initialized: true,
+    patched: patchesResult.success,
+  }
 }
 
 async function install() {
-  let openSpec = await check()
+  const install = await confirm({
+    message: "OpenSpec is not installed. Install it now?",
+    default: true,
+  })
 
-  if (openSpec.available) {
-    return { checked: true, available: true }
-  }
-
-  if (!openSpec.available) {
-    const install = await confirm({
-      message: "OpenSpec is not installed. Install it now?",
-      default: true,
-    })
-
-    if (install) {
-      info("Installing OpenSpec...")
-      try {
-        const result = await execa("npm", ["install", "@fission-ai/openspec", "--global"],
-          {
-            cwd: process.cwd(),
-            stdio: "pipe",
-            reject: false,
-          },
-        )
-        if (result.exitCode !== 0) warn("OpenSpec install failed, check output above")
-        success("OpenSpec installed")
-      } catch (err) {
-        error(`Failed to run openspec install: ${err.message}`)
+  if (install) {
+    info("Installing OpenSpec...")
+    try {
+      const result = await execa(
+        "npm",
+        ["install", "@fission-ai/openspec", "--global"],
+        {
+          cwd: process.cwd(),
+          stdio: "pipe",
+          reject: false,
+        },
+      )
+      if (result.exitCode !== 0) {
+        warn("OpenSpec install failed, check output above")
       }
+      success("OpenSpec installed")
+    } catch (err) {
+      error(`Failed to run openspec install: ${err.message}`)
     }
   }
-
-  openSpec = await check()
-  return  { checked: true, available: openSpec.available }
 }
 
 async function check() {
@@ -87,12 +98,14 @@ async function init() {
         cwd: process.cwd(),
         stdio: "pipe",
         reject: false,
-      }
+      },
     )
 
-    if (result.exitCode !== 0){
-      throw new Error(`init failed with exit code ${result.exitCode}, check output above`)
-    } 
+    if (result.exitCode !== 0) {
+      throw new Error(
+        `init failed with exit code ${result.exitCode}, check output above`,
+      )
+    }
   } catch (err) {
     error(`Failed to run openspec init: ${err.message}`)
     return { initialized: false }
@@ -104,18 +117,17 @@ async function init() {
 
 async function patch() {
   loading("Patching OpenSpec ensemble implementation...")
-  
+
   const patched = []
 
   for (const rel of APPLY_TARGETS) {
     const abs = path.join(process.cwd(), rel)
     try {
       const res = await patchApplyFile(abs)
-      if (res.ok){ 
+      if (res.ok) {
         patched.push(rel)
         success(`Patched ensemble implementation section in ${rel}`)
-      }
-      else warn(`Could not patch ${rel} (${res.reason})`)
+      } else warn(`Could not patch ${rel} (${res.reason})`)
     } catch (err) {
       warn(`Could not patch ${rel}: ${err.message}`)
     }
@@ -123,4 +135,3 @@ async function patch() {
 
   return { success: patched.length === APPLY_TARGETS.length, patched }
 }
-
