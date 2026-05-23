@@ -155,50 +155,6 @@ az devops invoke \
   ]
 }
 ```
-
----
-
-## Mode C: PR is merged (archive mode)
-
-Triggered before planning a new feature (/plan <url>) if the previous PR is not yet archived. User may also trigger by saying "PR has been merged" or "I have merged the PR".
-
-### Step 1: Find PR and verify merged
-
-```bash
-az repos pr list \ 
-  --repository {repo} \
-  --source-branch feature/{id}-{slug} \
-  --status completed
-```
-
-Verify PR is merged, not just closed.
-
-### Step 2: Create archive branch
-
-```bash
-git switch main
-git pull origin main
-git checkout -b archive/{id}-{slug}
-```
-
-### Step 3: Verify and move artifacts to archive
-
-```bash
-/opsx-verify us-{id}-{slug}
-/opsx-archive us-{id}-{slug}
-```
-
-### Step 4: Create archive PR
-
-```bash
-az repos pr create \
-  --repository {repo} \
-  --source-branch archive/{id}-{slug} \
-  --target-branch main \
-  --title "archive(#{id}): {title}" \
-  --description "Archive SDD artifacts for {id} after merge."
-```
-
 ---
 
 ## Guardrails
