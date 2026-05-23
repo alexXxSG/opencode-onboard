@@ -124,6 +124,45 @@ gh pr comment {pr-number} --body "Updated design.md to reflect feedback."
 
 ---
 
+## Mode C: PR is merged (archive mode)
+
+Triggered before planning a new feature (/plan <url>) if the previous PR is not yet archived. User may also trigger by saying "PR has been merged" or "I have merged the PR".
+
+### Step 1: Find PR and verify merged
+
+```bash
+gh pr list --repo {owner}/{repo} --state closed --head feature/{id}-{slug}
+```
+
+Verify PR is merged, not just closed.
+
+### Step 2: Create archive branch
+
+```bash
+git switch main
+git pull origin main
+git checkout -b archive/{id}-{slug}
+```
+
+### Step 3: Verify and move artifacts to archive
+
+```bash
+/opsx-verify us-{id}-{slug}
+/opsx-archive us-{id}-{slug}
+```
+
+### Step 4: Create archive PR
+
+```bash
+gh pr create \
+  --base main \
+  --head archive/{id}-{slug} \
+  --title "archive(#{id}): {title}" \
+  --body "Archive SDD artifacts for {id} after merge."
+```
+
+---
+
 ## Guardrails
 
 - ✅ Commit and push to feature branches only
