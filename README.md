@@ -102,6 +102,7 @@ Custom slash commands are installed into `.opencode/commands/` and are available
 | `/init`        | Initialize the project: generate `ARCHITECTURE.md`, `DESIGN.md`, archive history, activate agent team |
 | `/plan <url>`  | Parse a user story URL and produce a plan, proposal, specs, and tasks. Stops before implementation.   |
 | `/main <task>` | Quick direct implementation, no OpenSpec, no ensemble, no PRs. Just do it.                            |
+| `/create-engineer <name> "<description>"` | Create a custom engineer agent from a description, with skills auto-installed from [skills.sh](https://www.skills.sh/) |
 
 ---
 
