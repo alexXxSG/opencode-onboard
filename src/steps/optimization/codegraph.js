@@ -1,5 +1,54 @@
 import { execa } from 'execa'
+import fse from 'fs-extra'
+import path from 'node:path'
 import { header, success, warn, error, loading } from '../../utils/exec.js'
+
+/**
+ * After codegraph install, it may create an `opencode.jsonc` at the project root.
+ * This project uses `.opencode/opencode.json` instead. Merge any MCP config from
+ * the rogue file into the correct location and remove it.
+ */
+export async function fixCodegraphConfig() {
+  const cwd = process.cwd()
+  const rogueFile = path.join(cwd, 'opencode.jsonc')
+  const correctFile = path.join(cwd, '.opencode', 'opencode.json')
+
+  if (!await fse.pathExists(rogueFile)) return
+
+  let rogueContent
+  try {
+    const raw = await fse.readFile(rogueFile, 'utf-8')
+    // Strip JSONC comments (single-line // and block /* */) before parsing
+    const stripped = raw
+      .replace(/\/\/.*$/gm, '')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+    rogueContent = JSON.parse(stripped)
+  } catch {
+    warn('Could not parse opencode.jsonc, removing it')
+    await fse.remove(rogueFile)
+    return
+  }
+
+  let correctContent = {}
+  if (await fse.pathExists(correctFile)) {
+    try {
+      correctContent = await fse.readJson(correctFile)
+    } catch {
+      correctContent = {}
+    }
+  }
+
+  // Merge mcpServers from rogue into correct config
+  if (rogueContent.mcpServers || rogueContent.mcp) {
+    const mcpServers = rogueContent.mcpServers || rogueContent.mcp
+    correctContent.mcpServers = { ...(correctContent.mcpServers || {}), ...mcpServers }
+  }
+
+  await fse.ensureDir(path.dirname(correctFile))
+  await fse.writeJson(correctFile, correctContent, { spaces: 2 })
+  await fse.remove(rogueFile)
+  warn('Migrated codegraph config from opencode.jsonc → .opencode/opencode.json (removed opencode.jsonc)')
+}
 
 export async function installCodegraph(options = {}) {
   if (!options.skipHeader) header('Installing codegraph')
@@ -23,6 +72,8 @@ export async function installCodegraph(options = {}) {
       warn('codegraph install exited with non-zero code')
       return { optedIn: true, installed: false }
     }
+
+    await fixCodegraphConfig()
     success(`codegraph configured for opencode (${location})`)
   } catch (err) {
     error(`Failed to install codegraph: ${err.message}`)

@@ -356,6 +356,15 @@ Minimal non-negotiables:
 - Use `gh`/`az` CLI for platform operations.
 - In multi-repo source scope, run git operations per repository.
 
+### Config file conflict: `opencode.jsonc` vs `.opencode/opencode.json`
+
+This project uses `.opencode/opencode.json` as the single OpenCode configuration file. Some tools (e.g., codegraph) may create an `opencode.jsonc` file at the project root. **These two files cannot coexist.**
+
+If you detect both `opencode.jsonc` (project root) and `.opencode/opencode.json` exist:
+1. **Stop immediately** and warn the user: "Conflicting OpenCode config files detected. This project uses `.opencode/opencode.json` only. The root `opencode.jsonc` must be removed or its contents merged into `.opencode/opencode.json`."
+2. Do NOT proceed with any task until the conflict is resolved.
+3. If the user asks you to fix it: merge any `mcpServers` or other config from `opencode.jsonc` into `.opencode/opencode.json`, then delete `opencode.jsonc`.
+
 ---
 
 ## Communication Style
