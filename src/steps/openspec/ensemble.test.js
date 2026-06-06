@@ -85,6 +85,12 @@ describe('ENSEMBLE_SECTION dependency guidance', () => {
     expect(ENSEMBLE_SECTION).toContain('Repeat until every OpenSpec task is on the board')
   })
 
+  it('requires claim_task and idle-teammate recovery guidance', () => {
+    expect(ENSEMBLE_SECTION).toContain('ALWAYS set \`claim_task\` to the first unblocked task')
+    expect(ENSEMBLE_SECTION).toContain('If the teammate is idle and has not claimed any assigned task')
+    expect(ENSEMBLE_SECTION).toContain('stop forcing ensemble for this change and continue in the main session')
+  })
+
   it('does not include the impossible same-call dependency example', () => {
     expect(ENSEMBLE_SECTION).not.toContain('{ content: "3.1 <task that needs 1.x done first>", priority: "medium", depends_on: ["<id-of-1.1>"] }')
     expect(ENSEMBLE_SECTION).not.toContain('Use depends_on to block tasks that require other tasks first, pass the IDs returned by team_tasks_add.')

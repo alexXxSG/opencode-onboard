@@ -150,17 +150,16 @@ Implement tasks from an OpenSpec change using the ensemble agent team.
 
        Each team_spawn MUST include the agent field (required, causes NOT NULL error if omitted).
 
-       The spawn prompt must contain exactly:
+       The spawn prompt must contain:
        1. Their name and role on this team
-       1.1 Why they were selected for those tasks (domain/abilities match)
        2. Their initial batch of tasks (up to 3): list the LITERAL task IDs and content from the board.
        3. Key context they need (summarized from context files, do NOT tell them to read files themselves)
-       4. The 6 OpenCode tools they have available (these are OpenCode tools, NOT shell commands, call them directly as tools, never via bash):
-          team_claim, team_tasks_complete, team_tasks_list, team_tasks_add, team_message, team_broadcast
-       5. How to proceed: call team_claim tool with the task_id to claim a task before starting it, call team_tasks_complete tool after finishing it, repeat until all listed tasks are done, then call team_message tool to notify lead with results. Lead may assign more tasks, do NOT shut down until lead confirms no more tasks.
-       6. Which skills to load: list the skill names and paths they MUST read before implementing. Example: "Before starting, read `.agents/skills/next-best-practices/SKILL.md` and follow its rules for all Next.js code."
+       4. Task-specific verification commands or acceptance checks
+       5. Short assignment rationale only when it changes task routing or is needed to justify using `basic-engineer`
+       6. Any mandatory skill names or repo-specific rules that are not already guaranteed by the agent definition
 
-       Keep spawn prompts under 600 tokens. Do not describe team internals or how ensemble works.
+       Keep spawn prompts short and concrete. Prefer 200-350 tokens. Do not describe team internals or paste generic tool lists the plugin already injects.
+       ALWAYS set `claim_task` to the first unblocked task in that agent's initial batch.
        Only spawn agents whose tasks are actually needed by this change. Skip agents with no tasks.
 
        Spawn one or more best-fit workers (parallel when dependencies allow):
@@ -170,7 +169,7 @@ Implement tasks from an OpenSpec change using the ensemble agent team.
        team_spawn name:"eng-3" agent:"basic-engineer" prompt:"..."
        ```
 
-       Then immediately send each spawned worker a start message with exact task IDs:
+       Then send each spawned worker a short start message with exact task IDs if needed:
        ```
        team_message to:"eng-1" text:"Start now. Load @ob-global first, then use your agent `## Abilities` for these tasks: [task-<id1>] ... Claim each task ID before starting."
        team_message to:"eng-2" text:"Start now. Load @ob-global first, then use your agent `## Abilities` for these tasks: [task-<id2>] ... Claim each task ID before starting."
@@ -184,17 +183,22 @@ Implement tasks from an OpenSpec change using the ensemble agent team.
    **Step 6f.** When a teammate messages back (rolling re-assignment loop):
        1. Call `team_results from:"<name>"` to read full message.
        2. Call `team_tasks_list` to check remaining pending/unassigned tasks on the board.
-       3. **If there are more unassigned tasks matching this agent's domain:**
+       3. If the teammate is idle and has not claimed any assigned task:
+          - resend one short message with the same literal task IDs
+          - if they still do not claim, `team_shutdown member:"<name>" force:true`
+          - respawn the same role with a shorter prompt and the same first `claim_task`
+          - if the second spawn also stays idle, stop forcing ensemble for this change and continue in the main session or ask the user whether to retry later
+       4. **If there are more unassigned tasks matching this agent's domain:**
           - Pick up to 3 unassigned, unblocked tasks for this agent's domain.
           - Send them via `team_message to:"<name>" text:"Next tasks: [task-<id1>] <desc>, [task-<id2>] <desc>. Claim each with team_claim before starting."`
           - Do NOT shut down the agent. Go back to waiting (step 6e).
-       4. **If no more tasks for this agent:**
+       5. **If no more tasks for this agent:**
           - `team_shutdown member:"<name>"`
           - `team_merge member:"<name>"`
           - If team_merge blocks on local changes: `git stash`, retry merge, `git stash pop`.
-       5. **If ALL agents are shut down and tasks remain unassigned:**
+       6. **If ALL agents are shut down and tasks remain unassigned:**
           - Spawn new agents for the remaining tasks (back to step 6d).
-       6. **If ALL tasks are done:** proceed to step 7.
+       7. **If ALL tasks are done:** proceed to step 7.
 
        **ZERO PENDING TASKS GUARANTEE:** Before proceeding to step 7, call `team_tasks_list` and verify EVERY task is either `done` or `blocked`. If any task is `pending` and unassigned, assign it to an agent or spawn a new one. Never leave pending tasks orphaned.
 
@@ -233,16 +237,19 @@ Implement tasks from an OpenSpec change using the ensemble agent team.
 - NEVER poll team_results or team_status in a loop, wait for teammates to message you
 - NEVER call team_claim or team_tasks_complete as lead, only agents call these tools
 - NEVER leave pending tasks orphaned, always verify board is empty before proceeding to step 7
+- ALWAYS pass the LITERAL task IDs returned by team_tasks_add into each agent's spawn prompt, copy the exact IDs, never paraphrase
 - ALWAYS assign initial batch of up to 3 tasks per agent; re-assign next batch (up to 3) via team_message when agent reports done
 - ALWAYS call team_tasks_list after each agent reports done to check for remaining unassigned tasks
+- ALWAYS repeat the same literal task IDs in any task assignment message, never send a generic "claim your first task" without the actual IDs
+- NEVER send a start message that omits task IDs; if a task ID is missing from the start message, the agent cannot claim
 - NEVER edit files between team_spawn and team_merge, team_merge blocks on overlapping local changes
 - ALWAYS add every task to the board before spawning, using multiple `team_tasks_add` calls when dependency wiring requires it
 - ALWAYS spawn workers based on dependencies: parallel when safe, sequential when required
-- ALWAYS instruct agents to call team_claim before each task and team_tasks_complete after
+- ALWAYS set `claim_task` for the first unblocked task in each initial batch and instruct agents to call team_claim before each later task and team_tasks_complete after
 - ALWAYS shut down + merge agents only when no more tasks remain for their domain
 - Stop and report to user after 3 failed retries on any task — never retry indefinitely
 - Stop and report if 10 minutes pass with no agent commits
-- If teammates are stuck, use team_message to resend tasks, then wait, never implement directly
+- If teammates are stuck, use team_message to resend tasks once, then shutdown + respawn. If repeated idle/stall continues, stop forcing ensemble and continue outside it.
 - Mark tasks complete in openspec AFTER worker implementation and verification finish, not before
 - Pause on errors, blockers, or unclear requirements. Do not guess
 - Use contextFiles from CLI output, do not assume specific file paths

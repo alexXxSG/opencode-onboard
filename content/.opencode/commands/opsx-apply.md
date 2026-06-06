@@ -155,24 +155,23 @@ Implement tasks from an OpenSpec change using the ensemble agent team.
 
        Each team_spawn MUST include the agent field (required, causes NOT NULL error if omitted).
 
-       **Spawn prompt format (strict, max 400 tokens):**
+       **Spawn prompt format (strict, prefer 200-350 tokens):**
 
        ```
        You are {name}, {role}. Your file domain: {list of directories you own exclusively}.
 
-       Initial tasks (claim each with team_claim before starting, team_tasks_complete after commit):
+       Initial tasks:
        - {task_id_1}: {one-line description}
        - {task_id_2}: {one-line description}
        - {task_id_3}: {one-line description}
 
        Context: {2-3 sentences of essential context from the specs, NOT full file contents}
 
-       Build command: {e.g., "dotnet build TechEvents.slnx" or "pnpm build"}
-       After each task: git add -A && git commit -m "feat: <description>"
+       Verify with: {task-specific command or acceptance check}
 
        IMPORTANT: After completing all tasks above, message lead with results.
        Lead may assign you more tasks. Do NOT shut down until lead confirms no more tasks.
-       Start with team_claim on your first task NOW. Do not read files or plan first.
+       Use claim_task for your first unblocked task. For every later task, call team_claim before starting it and team_tasks_complete after finishing it.
        ```
 
        DO NOT include:
@@ -187,7 +186,9 @@ Implement tasks from an OpenSpec change using the ensemble agent team.
        team_spawn name:"eng-2" agent:"frontend-engineer" prompt:"..."
        ```
 
-       Then immediately send each spawned worker a start message:
+       Always set `claim_task` to the first unblocked task in the initial batch.
+
+       Then send each spawned worker a short start message if needed:
        ```
        team_message to:"eng-1" text:"Start now. First action: team_claim {first_task_id}. Go."
        team_message to:"eng-2" text:"Start now. First action: team_claim {first_task_id}. Go."
@@ -202,17 +203,22 @@ Implement tasks from an OpenSpec change using the ensemble agent team.
    **Step 6f.** When a teammate messages back (rolling re-assignment loop):
        1. Call `team_results from:"<name>"` to read full message.
        2. Call `team_tasks_list` to check remaining pending/unassigned tasks on the board.
-       3. **If there are more unassigned tasks matching this agent's domain:**
-          - Pick up to 3 unassigned, unblocked tasks for this agent's domain.
-          - Send them via `team_message to:"<name>" text:"Next tasks: [task-<id1>] <desc>, [task-<id2>] <desc>, [task-<id3>] <desc>. Claim each with team_claim before starting."`
-          - Do NOT shut down the agent. Go back to waiting (step 6e).
-       4. **If no more tasks for this agent:**
-          - `team_shutdown member:"<name>"`
-          - `team_merge member:"<name>"`
-          - If team_merge blocks on local changes: `git stash`, retry merge, `git stash pop`
-       5. **If ALL agents are shut down and tasks remain unassigned** (new domain, dependencies unblocked):
-          - Spawn new agents for the remaining tasks (back to step 6d).
-       6. **If ALL tasks are done:** proceed to step 7.
+        3. If the teammate is idle and has not claimed any assigned task:
+           - resend one short message with the same literal task IDs
+           - if they still do not claim, `team_shutdown member:"<name>" force:true`
+           - respawn the same role with a shorter prompt and the same first `claim_task`
+           - if the second spawn also stays idle, stop forcing ensemble for this change and continue in the main session or ask the user whether to retry later
+        4. **If there are more unassigned tasks matching this agent's domain:**
+           - Pick up to 3 unassigned, unblocked tasks for this agent's domain.
+           - Send them via `team_message to:"<name>" text:"Next tasks: [task-<id1>] <desc>, [task-<id2>] <desc>, [task-<id3>] <desc>. Claim each with team_claim before starting."`
+           - Do NOT shut down the agent. Go back to waiting (step 6e).
+        5. **If no more tasks for this agent:**
+           - `team_shutdown member:"<name>"`
+           - `team_merge member:"<name>"`
+           - If team_merge blocks on local changes: `git stash`, retry merge, `git stash pop`
+        6. **If ALL agents are shut down and tasks remain unassigned** (new domain, dependencies unblocked):
+           - Spawn new agents for the remaining tasks (back to step 6d).
+        7. **If ALL tasks are done:** proceed to step 7.
 
        **IMMEDIATE SHUTDOWN RULE:** Never leave a finished agent running when there are no more tasks for it. But DO keep agents alive if more tasks in their domain are pending.
 
@@ -264,10 +270,14 @@ Implement tasks from an OpenSpec change using the ensemble agent team.
 - NEVER call team_claim or team_tasks_complete as lead, only agents call these tools
 - NEVER edit files between team_spawn and team_merge, team_merge blocks on overlapping local changes
 - NEVER leave pending tasks orphaned, always verify board is empty before proceeding to step 7
+- ALWAYS pass the LITERAL task IDs returned by team_tasks_add into each agent's spawn prompt, copy the exact IDs, never paraphrase
 - ALWAYS add every task to the board before spawning, using multiple `team_tasks_add` calls when dependency wiring requires it
 - ALWAYS assign initial batch of up to 3 tasks per agent in spawn prompt
+- ALWAYS set `claim_task` for the first unblocked task in each initial batch
 - ALWAYS re-assign next batch (up to 3) via team_message when agent reports done, if more tasks exist for its domain
 - ALWAYS call team_tasks_list after each agent reports done to check for remaining unassigned tasks
+- ALWAYS repeat the same literal task IDs in any task assignment message, never send a generic "claim your first task" without the actual IDs
+- NEVER send a start message that omits task IDs; if a task ID is missing from the start message, the agent cannot claim
 - ALWAYS spawn workers based on dependencies: parallel when safe, sequential when required
 - ALWAYS instruct agents to call team_claim before each task and team_tasks_complete after
 - ALWAYS enforce max {{MAX_CONCURRENT_AGENTS}} truly concurrent agents (all running simultaneously, not sequentially)
@@ -275,7 +285,7 @@ Implement tasks from an OpenSpec change using the ensemble agent team.
 - ALWAYS shut down + merge agents only when no more tasks remain for their domain
 - Stop and report to user after 3 failed retries on any task — never retry indefinitely
 - Stop and report if 10 minutes pass with no agent commits
-- If teammates are stuck, use team_message to nudge, then stall detection (step 6g)
+- If teammates are stuck, use team_message to resend tasks once, then shutdown + respawn. If repeated idle/stall continues, stop forcing ensemble and continue outside it.
 - Mark tasks complete in openspec AFTER worker implementation and verification finish, not before
 - Pause on errors, blockers, or unclear requirements. Do not guess
 - Use contextFiles from CLI output, do not assume specific file paths

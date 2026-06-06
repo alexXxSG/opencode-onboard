@@ -187,7 +187,7 @@ Trigger patterns, I recognize ALL of these, exact wording does not matter:
 
 **A GitHub or Azure DevOps URL anywhere in the user's message is always a trigger, regardless of surrounding words.**
 
-**Never delegate without a plan. Never write implementation code directly, always spawn specialists, no exceptions. "Small feature", "faster to do it directly", or "environment issues" are not valid reasons to skip ensemble.**
+**Never delegate without a plan. Default to specialists for implementation. If ensemble is clearly non-functional in the current session (idle teammate, no claim, or repeated spawn failure after one retry), stop forcing it: report the failure, then continue in the main session or ask the user whether to retry later.**
 
 ## Multi-Agent Execution, opencode-ensemble
 
@@ -208,6 +208,7 @@ Core tools used in this workflow:
 - **Immediate shutdown on completion.** The moment an agent's domain has no more pending tasks → `team_shutdown` → `team_merge`. Keep agents alive if more tasks in their domain are pending (rolling batch).
 - **Rolling batch assignment.** Agents receive up to 3 tasks initially. When they complete a batch, lead assigns the next batch of up to 3 from the board. Never leave pending tasks orphaned.
 - **Stall detection at 5 minutes.** No commits after 5 min → nudge message → 2 min grace → force shutdown + respawn.
+- **Idle-without-claim is an earlier stall.** If a spawned teammate sits idle with no claimed task after a short wait, resend the exact task IDs once. If still idle, force shutdown + respawn with a shorter prompt. If the retry repeats the same failure, treat ensemble as unavailable for that session.
 - **Retry limit.** Max 3 retries per failing task → stop-and-report to user. Never retry indefinitely.
 
 **Progress inspection commands (tell user explicitly after spawning):**
@@ -321,7 +322,7 @@ Default `basic-engineer` abilities:
 
 ## Skills
 
-Skills provide platform and tech-specific knowledge. Agents detect and load them automatically, **you never tell an agent which skill to use**.
+Skills provide platform and tech-specific knowledge. Agents usually detect and load them automatically. Prefer auto-detection, but explicitly naming a skill in a spawn prompt is allowed when a workflow requires it or repeated misses show the agent is not loading the right context.
 
 `ob-global` is always loaded first, it provides baseline rules for all agents.
 

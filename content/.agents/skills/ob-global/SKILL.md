@@ -46,9 +46,10 @@ If multiple roots are generated, each root is an independent git repository. Bra
 
 When working as a spawned agent in an ensemble team, these rules are mandatory:
 
-**Claim-first execution:**
-- Your FIRST tool call after loading skills MUST be `team_claim task_id:<id>`. The dashboard must show your active task immediately.
-- Do NOT spend more than 2 tool calls reading/planning before writing code. Claim first, then explore only what's needed for that specific task.
+**Board-first claim flow:**
+- If you are working from assigned task IDs, your first task-board call may be `team_tasks_list` to confirm the task exists and its dependencies are done.
+- Your next task-board call for the first unblocked assigned task MUST be `team_claim task_id:<id>`. The dashboard should show your active task immediately after that.
+- Do NOT spend more than 2 total tool calls reading/planning before claiming an unblocked assigned task.
 
 **One task at a time:**
 - Claim → implement → build/verify → commit → `team_tasks_complete` → claim next.
@@ -59,6 +60,7 @@ When working as a spawned agent in an ensemble team, these rules are mandatory:
 - Before calling `team_claim task_id:<id>`, call `team_tasks_list` and verify every dependency of that task has status `done`.
 - If any dependency is not `done`, do NOT claim that task. Scan the board for another assigned task whose dependencies ARE all done and claim that one instead.
 - If no assigned task is unblocked, report blocked to lead and STOP. Do NOT poll, sleep, or loop waiting for a dependency.
+- If the lead provided `claim_task` or exact task IDs and the board does not match that assignment, report the mismatch to lead immediately instead of waiting idle.
 
 **Commit cadence:**
 - After each task passes build: `git add -A && git commit -m "feat: <short description>"`
