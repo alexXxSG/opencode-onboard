@@ -41,9 +41,9 @@ export async function fixCodegraphConfig() {
     }
   }
 
-  if (rogueContent.mcpServers || rogueContent.mcp) {
-    const mcpServers = rogueContent.mcpServers || rogueContent.mcp
-    correctContent.mcpServers = { ...(correctContent.mcpServers || {}), ...mcpServers }
+  const rogueMcp = rogueContent.mcpServers || rogueContent.mcp
+  if (rogueMcp) {
+    correctContent.mcp = { ...(correctContent.mcp || {}), ...rogueMcp }
   }
 
   await fse.ensureDir(path.dirname(correctFile))
@@ -93,7 +93,7 @@ export async function installCodegraph(options = {}) {
   loading('initializing codegraph project index...')
 
   try {
-    const initResult = await execa('codegraph', ['init'], {
+    const initResult = await execa('npx', ['codegraph', 'init'], {
       cwd: process.cwd(),
       reject: false,
       stdio: 'pipe',

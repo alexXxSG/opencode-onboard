@@ -35,7 +35,7 @@ describe('fixCodegraphConfig()', () => {
     expect(fs.existsSync(path.join(tmpDir, '.opencode', 'opencode.json'))).toBe(false)
   })
 
-  it('merges mcpServers from opencode.jsonc into .opencode/opencode.json', async () => {
+  it('merges mcpServers from opencode.jsonc into .opencode/opencode.json as mcp', async () => {
     const rogueContent = {
       mcpServers: {
         codegraph: { command: 'codegraph', args: ['mcp'] }
@@ -55,8 +55,26 @@ describe('fixCodegraphConfig()', () => {
     expect(result).toBe(true)
     expect(fs.existsSync(path.join(tmpDir, 'opencode.jsonc'))).toBe(false)
     const readResult = await fse.readJson(path.join(opencodeDir, 'opencode.json'))
-    expect(readResult.mcpServers.codegraph).toEqual({ command: 'codegraph', args: ['mcp'] })
+    expect(readResult.mcp.codegraph).toEqual({ command: 'codegraph', args: ['mcp'] })
     expect(readResult.plugin).toEqual(["opencode-plugin-openspec@latest"])
+  })
+
+  it('handles rogue file with mcp key directly', async () => {
+    const rogueContent = {
+      mcp: {
+        codegraph: { command: 'codegraph', args: ['mcp'] }
+      }
+    }
+    fs.writeFileSync(path.join(tmpDir, 'opencode.jsonc'), JSON.stringify(rogueContent))
+    fs.mkdirSync(path.join(tmpDir, '.opencode'), { recursive: true })
+    fs.writeFileSync(path.join(tmpDir, '.opencode', 'opencode.json'), '{}')
+
+    const result = await fixCodegraphConfig()
+
+    expect(result).toBe(true)
+    expect(fs.existsSync(path.join(tmpDir, 'opencode.jsonc'))).toBe(false)
+    const readResult = await fse.readJson(path.join(tmpDir, '.opencode', 'opencode.json'))
+    expect(readResult.mcp.codegraph.command).toBe('codegraph')
   })
 
   it('handles JSONC with comments', async () => {
@@ -77,7 +95,7 @@ describe('fixCodegraphConfig()', () => {
     expect(result).toBe(true)
     expect(fs.existsSync(path.join(tmpDir, 'opencode.jsonc'))).toBe(false)
     const readResult = await fse.readJson(path.join(opencodeDir, 'opencode.json'))
-    expect(readResult.mcpServers.codegraph.command).toBe('codegraph')
+    expect(readResult.mcp.codegraph.command).toBe('codegraph')
   })
 
   it('handles JSONC with URLs containing //', async () => {
@@ -100,7 +118,7 @@ describe('fixCodegraphConfig()', () => {
     expect(result).toBe(true)
     expect(fs.existsSync(path.join(tmpDir, 'opencode.jsonc'))).toBe(false)
     const readResult = await fse.readJson(path.join(opencodeDir, 'opencode.json'))
-    expect(readResult.mcpServers.codegraph.command).toBe('codegraph')
+    expect(readResult.mcp.codegraph.command).toBe('codegraph')
   })
 
   it('removes unparseable opencode.jsonc, warns, and returns false', async () => {
@@ -125,7 +143,7 @@ describe('fixCodegraphConfig()', () => {
 
     expect(result).toBe(true)
     const readResult = await fse.readJson(path.join(tmpDir, '.opencode', 'opencode.json'))
-    expect(readResult.mcpServers.codegraph.command).toBe('codegraph')
+    expect(readResult.mcp.codegraph.command).toBe('codegraph')
     expect(fs.existsSync(path.join(tmpDir, 'opencode.jsonc'))).toBe(false)
   })
 })
