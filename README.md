@@ -218,7 +218,7 @@ Each agent runs in its own isolated git worktree via [OpenCode Ensemble](https:/
 
 ```
 your-project/
-├── AGENTS.md                        ← bootstrap mode, replaced after first "init"
+├── AGENTS.md                        ← bootstrap mode, replaced after first "/ob-init"
 ├── ARCHITECTURE.md                  ← prompt for agents to fill in from your codebase
 ├── DESIGN.md                        ← prompt for agents to fill in from your codebase
 ├── .opencode/

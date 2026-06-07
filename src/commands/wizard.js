@@ -111,7 +111,7 @@ export async function runWizard(version) {
   console.log(chalk.bold.green('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'))
   console.log()
   console.log('  Open this project in OpenCode and type:')
-  console.log(chalk.bold('  "init"'))
+  console.log(chalk.bold('  "/ob-init"'))
   console.log()
   if (toGenerate.length > 0) {
     console.log(`  OpenCode will generate ${toGenerate.join(' and ')}`)

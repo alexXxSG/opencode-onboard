@@ -1,6 +1,6 @@
 import { execa } from "execa"
 import path from "node:path"
-import { commandExists, error, header, info, loading, success, warn} from "../../utils/exec.js"
+import { commandExists, error, header, info, loading, success, warn } from "../../utils/exec.js"
 import { APPLY_TARGETS, patchApplyFile } from "./ensemble.js"
 
 export const openspecSteps = {
@@ -58,7 +58,7 @@ async function install() {
     success("OpenSpec installed")
   } catch (err) {
     error(`Failed to run openspec install: ${err.message}`)
-  }  
+  }
 }
 
 async function check() {
@@ -77,7 +77,7 @@ async function init() {
   try {
     const result = await execa(
       "npx",
-      ["@fission-ai/openspec", "init", "--tools", "opencode", "--force"],
+      ["@fission-ai/openspec", "/ob-init", "--tools", "opencode", "--force"],
       {
         cwd: process.cwd(),
         stdio: "pipe",
