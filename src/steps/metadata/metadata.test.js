@@ -104,4 +104,14 @@ describe('writeOnboardConfig()', () => {
     const payload = call[1]
     expect(payload.wizard.platform).toBe('none')
   })
+
+  it('omits model metadata when no model is selected', async () => {
+    execa.mockResolvedValue({ exitCode: 0, stdout: '1', stderr: '' })
+
+    await writeOnboardConfig({ platform: 'github', sourceMode: 'current', sourceRoots: [], cwd: tmpDir })
+
+    const call = fse.writeJson.mock.calls[0]
+    const payload = call[1]
+    expect(payload.wizard.models).toBeUndefined()
+  })
 })

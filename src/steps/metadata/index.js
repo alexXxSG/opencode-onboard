@@ -24,6 +24,13 @@ export async function writeOnboardConfig(data) {
   const opencodeVersion = await detectOpencodeVersion()
   const cwd = data.cwd ?? process.cwd()
   const target = path.join(cwd, '.opencode', 'opencode-onboard.json')
+  const selectedModels = Object.fromEntries(
+    Object.entries({
+      plan: data.planModel,
+      build: data.buildModel,
+      fast: data.fastModel,
+    }).filter(([, value]) => value)
+  )
 
   const payload = {
     schema: 1,
@@ -42,11 +49,7 @@ export async function writeOnboardConfig(data) {
       },
       openspec: data.openspec,
       additionalSkillsProvider: data.additionalSkillsProvider,
-      models: {
-        plan: data.planModel,
-        build: data.buildModel,
-        fast: data.fastModel,
-      },
+      ...(Object.keys(selectedModels).length > 0 ? { models: selectedModels } : {}),
       optionalTools: data.optionalTools ?? null,
       cavemanGuidance: data.cavemanGuidance ?? null,
     },

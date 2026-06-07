@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildDisplayModels } from './format.js'
+import { buildDisplayModels, buildModelChoices } from './format.js'
 
 describe('buildDisplayModels()', () => {
   it('adds cost tier label for cheap models', () => {
@@ -71,5 +71,31 @@ describe('buildDisplayModels()', () => {
     expect(result[0].id).toBe('expensive/model')
     expect(result[1].id).toBe('cheap/model')
     expect(result[2].id).toBe('mid/model')
+  })
+
+  it('keeps None as the first choice with no search', () => {
+    const models = buildDisplayModels([
+      { id: 'openai/gpt-4.1', name: 'GPT-4.1', cost: 2, context: 128000 },
+    ])
+
+    const result = buildModelChoices('', models)
+
+    expect(result[0]).toEqual({
+      name: 'None',
+      value: null,
+      description: 'Leave this model unset',
+    })
+  })
+
+  it('keeps None as the first choice during search', () => {
+    const models = buildDisplayModels([
+      { id: 'openai/gpt-4.1', name: 'GPT-4.1', cost: 2, context: 128000 },
+      { id: 'anthropic/claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', cost: 3, context: 200000 },
+    ])
+
+    const result = buildModelChoices('claude', models)
+
+    expect(result[0].name).toBe('None')
+    expect(result[1].value).toBe('anthropic/claude-3-5-sonnet')
   })
 })

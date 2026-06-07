@@ -38,23 +38,33 @@ export function buildDisplayModels(rawModels) {
   });
 }
 
+export function buildModelChoices(input, models) {
+  const q = (input || '').toLowerCase();
+  const filtered = q
+    ? models.filter(m =>
+        m.label.toLowerCase().includes(q) ||
+        m.id.toLowerCase().includes(q)
+      )
+    : models;
+
+  return [
+    {
+      name: 'None',
+      value: null,
+      description: 'Leave this model unset',
+    },
+    ...filtered.slice(0, 50).map(m => ({
+      name: m.label,
+      value: m.id,
+      description: m.description,
+    })),
+  ];
+}
+
 export function pickModel(message, models) {
   return search({
     message,
-    source: (input) => {
-      const q = (input || '').toLowerCase();
-      const filtered = q
-        ? models.filter(m =>
-            m.label.toLowerCase().includes(q) ||
-            m.id.toLowerCase().includes(q)
-          )
-        : models;
-      return filtered.slice(0, 50).map(m => ({
-        name: m.label,
-        value: m.id,
-        description: m.description,
-      }));
-    },
+    source: input => buildModelChoices(input, models),
   });
 }
 

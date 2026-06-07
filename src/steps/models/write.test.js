@@ -57,6 +57,24 @@ custom_field: custom_value
     expect(updated).toContain('custom_field: custom_value')
     expect(updated).toContain('model: test/model')
   })
+
+  it('removes model field when no model is selected', async () => {
+    const filePath = path.join(tmpDir, 'test-agent.md')
+    const original = `---
+name: Test Agent
+model: existing/model
+description: A test agent
+---
+
+# Test Agent`
+    fs.writeFileSync(filePath, original, 'utf-8')
+
+    await writeModelToAgent(filePath, null)
+
+    const updated = fs.readFileSync(filePath, 'utf-8')
+    expect(updated).not.toContain('model:')
+    expect(updated).toContain('description: A test agent')
+  })
 })
 
 describe('writeModelsToConfigs()', () => {
@@ -114,5 +132,28 @@ describe('writeModelsToConfigs()', () => {
     })
 
     expect(success).toHaveBeenCalled()
+  })
+
+  it('removes model config entries when None is selected', async () => {
+    const agentFile = path.join(agentsDir, 'basic-engineer.md')
+    const ensembleJsonPath = path.join(tmpDir, '.opencode', 'ensemble.json')
+
+    fs.writeFileSync(agentFile, '---\nname: Basic\nmodel: existing/model\n---', 'utf-8')
+    fs.writeFileSync(opencodeJsonPath, JSON.stringify({ model: 'existing/model', theme: 'dark' }, null, 2), 'utf-8')
+    fs.writeFileSync(ensembleJsonPath, JSON.stringify({ modelsByAgent: { plan: 'a', build: 'b', explore: 'c', keep: 'yes' } }, null, 2), 'utf-8')
+
+    await writeModelsToConfigs({
+      planModel: null,
+      buildModel: null,
+      fastModel: null,
+      agentsDir,
+      cwd: tmpDir,
+      preset: { roles: { build: { agents: ['basic-engineer'] }, fast: { agents: [] } } },
+    })
+
+    expect(fs.readFileSync(agentFile, 'utf-8')).not.toContain('model:')
+    expect(JSON.parse(fs.readFileSync(opencodeJsonPath, 'utf-8'))).toEqual({ theme: 'dark' })
+    expect(JSON.parse(fs.readFileSync(ensembleJsonPath, 'utf-8'))).toEqual({ modelsByAgent: { keep: 'yes' } })
+    expect(success).not.toHaveBeenCalled()
   })
 })

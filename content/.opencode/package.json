@@ -3,6 +3,6 @@
     "@opencode-ai/plugin": "latest",
     "opencode-plugin-openspec": "latest",
     "@different-ai/opencode-browser": "latest",
-    "@hueyexe/opencode-ensemble": "latest"
+    "@hueyexe/opencode-ensemble": "0.14.1"
   }
 }
