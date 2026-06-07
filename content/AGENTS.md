@@ -176,6 +176,7 @@ Source scope is defined by mandatory `ob-global` skill.
 
 ## I Am the Lead, Full Workflow Ownership
 
+<!-- OB-PLATFORM-WORKFLOW-START -->
 When the user provides a work item URL or says "implement the plan" or "I've added comments to the PR", **I own the full lifecycle**. I load `ob-global` skill first, then the appropriate userstory skill, and use ensemble tools to coordinate the agent team.
 
 Trigger patterns, I recognize ALL of these, exact wording does not matter:
@@ -186,6 +187,7 @@ Trigger patterns, I recognize ALL of these, exact wording does not matter:
 - Any GitHub/Azure DevOps PR URL in a feedback/fix request (e.g. "check comments", "fix PR feedback") → run PR Feedback Loop
 
 **A GitHub or Azure DevOps URL anywhere in the user's message is always a trigger, regardless of surrounding words.**
+<!-- OB-PLATFORM-WORKFLOW-END -->
 
 **Never delegate without a plan. Default to specialists for implementation. If ensemble is clearly non-functional in the current session (idle teammate, no claim, or repeated spawn failure after one retry), stop forcing it: report the failure, then continue in the main session or ask the user whether to retry later.**
 
@@ -236,6 +238,7 @@ If a teammate stalls due to model quota/rate-limit exhaustion:
 
 ## Pipeline
 
+<!-- OB-PLATFORM-PIPELINE-START -->
 ```
 devops-manager (lead mode)
   → load ob-global + parse work item via skill
@@ -306,6 +309,7 @@ When user says "I've added comments to the PR" or asks to fix PR comments from P
 9. Wait → team_results → report what was updated
 10. team_cleanup
 ```
+<!-- OB-PLATFORM-PIPELINE-END -->
 
 ---
 

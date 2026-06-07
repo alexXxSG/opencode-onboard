@@ -18,7 +18,12 @@ export async function runJoin() {
   const saved = await readOnboardConfig()
   const savedPlatform = saved?.wizard?.platform
   if (savedPlatform) {
-    info(`Detected project platform: ${savedPlatform === 'github' ? 'GitHub' : 'Azure DevOps'}`)
+    const display = savedPlatform === 'github'
+      ? 'GitHub'
+      : savedPlatform === 'azure'
+        ? 'Azure DevOps'
+        : 'None'
+    info(`Detected project platform: ${display}`)
     await checkPlatform(savedPlatform)
   } else {
     const platform = await choosePlatform()

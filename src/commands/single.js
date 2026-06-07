@@ -20,7 +20,7 @@ export async function runSingleCommand(command) {
     maxConcurrentAgents: savedWizard?.maxConcurrentAgents ?? 4,
   }
   const platform = savedWizard?.platform
-  const resolvedPlatform = platform === 'azure' || platform === 'github' ? platform : 'github'
+  const resolvedPlatform = platform === 'azure' || platform === 'github' || platform === 'none' ? platform : 'github'
 
   const handlers = {
     clean: async () => {

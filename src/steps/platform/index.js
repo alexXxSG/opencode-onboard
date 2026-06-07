@@ -12,6 +12,12 @@ const platformsPreset = await fse.readJson(PLATFORMS_PRESET_PATH)
 
 export async function checkPlatform(platform) {
   const preset = platformsPreset.find(p => p.value === platform) || platformsPreset[0]
+  if (!preset.cli) {
+    header(`Step 4, Checking ${preset.name} CLI`)
+    info('No platform integration selected, skipping CLI checks.')
+    success(`Platform: ${preset.name}`)
+    return
+  }
   await checkPlatformCli(preset)
 }
 
@@ -23,7 +29,8 @@ export async function choosePlatform() {
     choices: platformsPreset.map(p => ({ name: p.name, value: p.value })),
   })
 
-  success(`Platform: ${platform === 'github' ? 'GitHub' : 'Azure DevOps'}`)
+  const preset = platformsPreset.find(p => p.value === platform)
+  success(`Platform: ${preset?.name || platform}`)
   await checkPlatform(platform)
   return platform
 }

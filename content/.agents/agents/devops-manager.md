@@ -46,6 +46,10 @@ Rules:
 - If no skill exists for the platform, report it as a blocker rather than improvising
 - Skills listed in the spawn prompt are MANDATORY, not optional
 
+<!-- OB-PLATFORM-MODE-START -->
+This project uses platform-integrated workflow modes described below.
+<!-- OB-PLATFORM-MODE-END -->
+
 ## Working Modes
 
 ### Read Mode (pipeline start)
