@@ -1,7 +1,7 @@
 ---
 description: Basic Engineer Agent.
 mode: primary
-color: #68A063
+color: success
 permission:
   edit: allow
   bash: allow

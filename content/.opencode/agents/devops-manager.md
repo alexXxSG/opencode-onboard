@@ -1,7 +1,7 @@
 ---
 description: Process agent. Reads work items and user stories at pipeline start. Creates PRs, posts screenshots, responds to review comments at pipeline end. Bridges the work tracker and the repository. Platform knowledge comes from skills.
-mode: primary
-color: #690a69
+mode: subagent
+color: primary
 permission:
   edit: allow
   bash: allow
