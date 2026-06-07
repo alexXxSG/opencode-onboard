@@ -12,7 +12,7 @@ export async function chooseModels() {
 
   if (!rawModels) {
     warn('Could not fetch models (offline and no cache). Skipping model selection.');
-    warn('Set models later in .agents/agents/<name>.md and .opencode/opencode.json');
+    warn('Set models later in .opencode/agents/<name>.md and .opencode/opencode.json');
     return;
   }
 
@@ -26,7 +26,7 @@ export async function chooseModels() {
   success(`${models.length} models available`);
   console.log();
   info('Cost indicators: [$] cheap  [$$] mid  [$$$] expensive');
-  info('Type to search. Change selections later in .agents/agents/ and .opencode/opencode.json');
+  info('Type to search. Change selections later in .opencode/agents/ and .opencode/opencode.json');
   console.log();
 
   for (const line of modelsPreset.roles.plan.info) info(line);
@@ -41,12 +41,12 @@ export async function chooseModels() {
   const fastModel = await pickModel(modelsPreset.roles.fast.prompt, models);
   console.log();
 
-  const agentsDir = path.join(process.cwd(), '.agents', 'agents');
+  const agentsDir = path.join(process.cwd(), '.opencode', 'agents');
   await writeModelsToConfigs({ planModel, buildModel, fastModel, agentsDir, preset: modelsPreset });
 
   console.log();
   warn('Make sure you have API access to the selected models.');
-  warn('Change them anytime in .agents/agents/<name>.md and .opencode/opencode.json');
+  warn('Change them anytime in .opencode/agents/<name>.md and .opencode/opencode.json');
 
   return { planModel, buildModel, fastModel };
 }

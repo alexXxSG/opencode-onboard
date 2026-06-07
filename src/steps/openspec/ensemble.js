@@ -51,12 +51,12 @@ export const ENSEMBLE_SECTION = `6. **Implement via ensemble team**
       - Only shut down an agent when the board has no more tasks for its domain.
 
       Before spawning:
-      - scan \`.agents/agents/\` and list the engineers that actually exist in this project
+      - scan \`.opencode/agents/\` and list the engineers that actually exist in this project
       - exclude \`devops-manager\` from implementation selection
       - read each engineer's description and abilities
       - prefer the most specialized custom engineer whose description and abilities match the task
       - use \`basic-engineer\` only when no custom engineer is a clear fit or as a recovery fallback
-      - never spawn an engineer name that is not present in \`.agents/agents/\`
+      - never spawn an engineer name that is not present in \`.opencode/agents/\`
 
       Each \`team_spawn\` MUST include the agent field (required, causes NOT NULL error if omitted).
 
@@ -131,7 +131,7 @@ export const ENSEMBLE_SECTION = `6. **Implement via ensemble team**
           - \`team_merge member:"<name>"\`
           - If team_merge blocks on local changes: \`git stash\`, retry merge, \`git stash pop\`.
       6. **If ALL agents are shut down and tasks remain unassigned** (new domain, dependencies unblocked):
-          - Discover the remaining matching engineers from \`.agents/agents/\` and spawn a new wave (back to step 6d).
+          - Discover the remaining matching engineers from \`.opencode/agents/\` and spawn a new wave (back to step 6d).
       7. **If ALL tasks are done:** proceed to step 7.
       If a teammate reports rate-limit/quota/token exhaustion, immediately shutdown that teammate and respawn with an available model.
 
@@ -176,7 +176,7 @@ export const ENSEMBLE_SECTION = `6. **Implement via ensemble team**
 - NEVER send a start message that omits task IDs; if a task ID is missing from the start message, the agent cannot claim
 - NEVER edit files between team_spawn and team_merge, team_merge blocks on overlapping local changes
 - ALWAYS add every task to the board before spawning, using multiple \`team_tasks_add\` calls when dependency wiring requires it
-- ALWAYS discover engineers from \`.agents/agents/\` and prefer matching custom engineers over \`basic-engineer\`
+- ALWAYS discover engineers from \`.opencode/agents/\` and prefer matching custom engineers over \`basic-engineer\`
 - ALWAYS spawn agents sequentially (wait for each team_spawn result before the next), then send start messages to all of them together
 - ALWAYS set \`claim_task\` for the first unblocked task in each initial batch and instruct agents to claim before any other work
 - ALWAYS shut down + merge agents only when no more tasks remain for their domain

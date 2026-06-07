@@ -92,7 +92,7 @@ describe('ENSEMBLE_SECTION dependency guidance', () => {
   })
 
   it('prefers discovered custom engineers over hardcoded role inventory', () => {
-    expect(ENSEMBLE_SECTION).toContain('scan `.agents/agents/` and list the engineers that actually exist in this project')
+    expect(ENSEMBLE_SECTION).toContain('scan \`.opencode/agents/\` and list the engineers that actually exist in this project')
     expect(ENSEMBLE_SECTION).toContain('prefer the most specialized custom engineer')
     expect(ENSEMBLE_SECTION).not.toContain('front-engineer: UI, components, framework skills')
     expect(ENSEMBLE_SECTION).not.toContain('team_spawn name:"front" agent:"front-engineer"')

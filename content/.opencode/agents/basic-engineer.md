@@ -1,8 +1,7 @@
 ---
 description: Basic Engineer Agent.
-mode: subagent
+mode: primary
 color: #68A063
-temperature: 0.2
 permission:
   edit: allow
   bash: allow

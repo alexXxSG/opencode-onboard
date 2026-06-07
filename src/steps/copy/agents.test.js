@@ -30,8 +30,8 @@ describe('platform patching', () => {
   })
 
   it('patches devops-manager for none mode without platform skills', async () => {
-    const source = path.join(process.cwd(), 'content', '.agents', 'agents', 'devops-manager.md')
-    const dest = path.join(tmpDir, '.agents', 'agents', 'devops-manager.md')
+    const source = path.join(process.cwd(), 'content', '.opencode', 'agents', 'devops-manager.md')
+    const dest = path.join(tmpDir, '.opencode', 'agents', 'devops-manager.md')
     await fse.ensureDir(path.dirname(dest))
     await fse.copyFile(source, dest)
 

@@ -117,15 +117,15 @@ Implement tasks from an OpenSpec change using the ensemble agent team.
        - Only shut down an agent when the board has no more tasks for its domain.
 
        Before spawning:
-       - scan `.agents/agents/` and list the engineers that actually exist in this project
+       - scan `.opencode/agents/` and list the engineers that actually exist in this project
        - exclude `devops-manager` from implementation selection
        - read each engineer's description and abilities
        - prefer the most specialized custom engineer whose description and abilities match the task
        - use `basic-engineer` only when no custom engineer is a clear fit or as a recovery fallback
-       - never spawn an engineer name that is not present in `.agents/agents/`
+       - never spawn an engineer name that is not present in `.opencode/agents/`
 
        REQUIRED assignment algorithm (do not skip):
-       1. Build candidate list from `.agents/agents/*.md` excluding `devops-manager`.
+       1. Build candidate list from `.opencode/agents/*.md` excluding `devops-manager`.
        2. Classify each task by domain using task text (api/backend, ui/frontend, infra/devops, testing/qa).
        3. For each task, score every candidate agent:
           - +3 if agent description explicitly matches domain
@@ -137,7 +137,7 @@ Implement tasks from an OpenSpec change using the ensemble agent team.
 
        HARD RULES:
        - NEVER assign a task to `basic-engineer` if a specialized agent has higher score.
-       - NEVER skip agent discovery from `.agents/agents/*.md`.
+       - NEVER skip agent discovery from `.opencode/agents/*.md`.
        - ALWAYS include assignment rationale only when it changes task routing or is needed to justify using `basic-engineer`.
 
        Skill loading is worker-driven:
@@ -217,7 +217,7 @@ Implement tasks from an OpenSpec change using the ensemble agent team.
           - `team_merge member:"<name>"`
           - If team_merge blocks on local changes: `git stash`, retry merge, `git stash pop`.
        6. **If ALL agents are shut down and tasks remain unassigned** (new domain, dependencies unblocked):
-          - Discover the remaining matching engineers from `.agents/agents/` and spawn a new wave (back to step 6d).
+          - Discover the remaining matching engineers from `.opencode/agents/` and spawn a new wave (back to step 6d).
        7. **If ALL tasks are done:** proceed to step 7.
 
        **ZERO PENDING TASKS GUARANTEE:** Before proceeding to step 7, call `team_tasks_list` and verify EVERY task is either `done` or `blocked`. If any task is `pending` and unassigned, assign it to an agent or spawn a new one. Never leave pending tasks orphaned.
@@ -264,7 +264,7 @@ Implement tasks from an OpenSpec change using the ensemble agent team.
 - ALWAYS call team_tasks_list after each agent reports done to check for remaining unassigned tasks
 - ALWAYS repeat the same literal task IDs in any task assignment message, never send a generic "claim your first task" without the actual IDs
 - NEVER send a start message that omits task IDs; if a task ID is missing from the start message, the agent cannot claim
-- ALWAYS discover engineers from `.agents/agents/` and prefer matching custom engineers over `basic-engineer`
+- ALWAYS discover engineers from `.opencode/agents/` and prefer matching custom engineers over `basic-engineer`
 - ALWAYS spawn agents sequentially (wait for each team_spawn result before the next), then send start messages to all of them together
 - ALWAYS set `claim_task` for the first unblocked task in each initial batch and instruct agents to claim before any other work
 - ALWAYS shut down + merge agents only when no more tasks remain for their domain

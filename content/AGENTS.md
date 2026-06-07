@@ -194,11 +194,11 @@ Trigger patterns, I recognize ALL of these, exact wording does not matter:
 ## Engineer Selection
 
 Before spawning implementation workers:
-- Inspect `.agents/agents/*.md` and build the list of engineers that actually exist in this project.
+- Inspect `.opencode/agents/*.md` and build the list of engineers that actually exist in this project.
 - Exclude `devops-manager` from implementation selection.
 - Prefer the most specialized custom engineer whose description and abilities clearly match the task domain.
 - Use `basic-engineer` only when no custom engineer is a clear fit or as a recovery fallback.
-- Never spawn engineer names that are not present in `.agents/agents/`.
+- Never spawn engineer names that are not present in `.opencode/agents/`.
 - When multiple engineers could fit, choose the narrower specialist before the generalist.
 
 ## Multi-Agent Execution, opencode-ensemble
@@ -248,7 +248,7 @@ devops-manager (lead mode)
         ↓
   [confirm with user]
         ↓
-basic-engineer + custom-engineer-* (parallel as needed)
+basic-engineer + *-engineer (parallel as needed)
   → claim tasks + load abilities + implement
         ↓
 devops-manager (ship mode)
@@ -273,7 +273,7 @@ devops-manager (ship mode)
    - Step 5b: classify cost tier, announce scope, ask user to confirm if ≥4 tasks.
    - Lead adds all tasks to board.
    - When dependencies exist, lead uses multiple `team_tasks_add` waves so later tasks can reference real task IDs returned by earlier waves.
-   - Lead discovers available engineers from `.agents/agents/*.md`, prefers matching custom engineers, then spawns engineers with initial batch of up to 3 tasks each (rolling batch model).
+   - Lead discovers available engineers from `.opencode/agents/*.md`, prefers matching custom engineers, then spawns engineers with initial batch of up to 3 tasks each (rolling batch model).
    - Each engineer claims tasks, implements, completes, messages lead.
    - Lead assigns next batch (up to 3) to agents that report done. Repeat until board empty.
    - Lead merges each engineer branch after shutdown, then marks tasks done in tasks.md.
@@ -319,8 +319,8 @@ All agents are universal, no project-specific knowledge. Platform and tech knowl
 
 | Agent | File | Role |
 |-------|------|------|
-| `devops-manager` | .agents/agents/devops-manager.md | Reads work items, creates PRs, handles review feedback |
-| `basic-engineer` | .agents/agents/basic-engineer.md | Generic implementation worker using ability-loaded skills |
+| `devops-manager` | .opencode/agents/devops-manager.md | Reads work items, creates PRs, handles review feedback |
+| `basic-engineer` | .opencode/agents/basic-engineer.md | Generic implementation worker using ability-loaded skills |
 
 User can add more custom engineer agents and run them in parallel. Keep behavior ability-driven via skill mappings. Custom engineers are the primary specialization mechanism; `basic-engineer` is the general fallback when no custom engineer is a clear fit.
 
@@ -377,7 +377,7 @@ When `## Source Roots` lists multiple roots, each root is an independent git rep
 │   ├── agents/        # Agent definitions (universal, no project knowledge)
 │   │   ├── devops-manager.md
 │   │   ├── basic-engineer.md
-│   │   └── custom-engineer-*.md   # optional, user-defined workers
+│   │   └── *-engineer.md   # optional, user-defined workers
 │   └── skills/      # Skills (platform/tech specific knowledge)
 │       ├── ob-global/              ← baseline skill, load first
 │       ├── ob-default/            ← fallback skill

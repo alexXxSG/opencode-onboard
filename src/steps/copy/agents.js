@@ -123,7 +123,7 @@ function buildPipelineSection(platform) {
       '        ↓',
       '  [confirm with user when scope needs it]',
       '        ↓',
-      'basic-engineer + custom-engineer-* (parallel as needed)',
+      'basic-engineer + *-engineer (parallel as needed)',
       '  → claim tasks + load abilities + implement',
       '        ↓',
       'main session',
@@ -148,7 +148,7 @@ function buildPipelineSection(platform) {
       '   - Step 5b: classify cost tier, announce scope, ask user to confirm if ≥4 tasks.',
       '   - Lead adds all tasks to board.',
       '   - When dependencies exist, lead uses multiple `team_tasks_add` waves so later tasks can reference real task IDs returned by earlier waves.',
-      '   - Lead discovers available engineers from `.agents/agents/*.md`, prefers matching custom engineers, then spawns engineers with initial batch of up to 3 tasks each (rolling batch model).',
+       '   - Lead discovers available engineers from `.opencode/agents/*.md`, prefers matching custom engineers, then spawns engineers with initial batch of up to 3 tasks each (rolling batch model).',
       '   - Each engineer claims tasks, implements, completes, messages lead.',
       '   - Lead assigns next batch (up to 3) to agents that report done. Repeat until board empty.',
       '   - Lead merges each engineer branch after shutdown, then marks tasks done in tasks.md.',
@@ -177,7 +177,7 @@ function buildPipelineSection(platform) {
     '        ↓',
     '  [confirm with user]',
     '        ↓',
-    'basic-engineer + custom-engineer-* (parallel as needed)',
+    'basic-engineer + *-engineer (parallel as needed)',
     '  → claim tasks + load abilities + implement',
     '        ↓',
     'devops-manager (ship mode)',
@@ -202,7 +202,7 @@ function buildPipelineSection(platform) {
     '   - Step 5b: classify cost tier, announce scope, ask user to confirm if ≥4 tasks.',
     '   - Lead adds all tasks to board.',
     '   - When dependencies exist, lead uses multiple `team_tasks_add` waves so later tasks can reference real task IDs returned by earlier waves.',
-    '   - Lead discovers available engineers from `.agents/agents/*.md`, prefers matching custom engineers, then spawns engineers with initial batch of up to 3 tasks each (rolling batch model).',
+     '   - Lead discovers available engineers from `.opencode/agents/*.md`, prefers matching custom engineers, then spawns engineers with initial batch of up to 3 tasks each (rolling batch model).',
     '   - Each engineer claims tasks, implements, completes, messages lead.',
     '   - Lead assigns next batch (up to 3) to agents that report done. Repeat until board empty.',
     '   - Lead merges each engineer branch after shutdown, then marks tasks done in tasks.md.',
@@ -319,7 +319,7 @@ export async function patchAgentGuidance(platform, cwd = process.cwd()) {
 }
 
 export async function patchDevopsManagerMd(platform, cwd = process.cwd()) {
-  const devopsPath = path.join(cwd, '.agents', 'agents', 'devops-manager.md')
+  const devopsPath = path.join(cwd, '.opencode', 'agents', 'devops-manager.md')
   if (!await fse.pathExists(devopsPath)) return
 
   const resolved = platform === 'azure' ? 'azure' : platform === 'none' ? 'none' : 'github'

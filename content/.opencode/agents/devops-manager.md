@@ -1,7 +1,7 @@
 ---
 description: Process agent. Reads work items and user stories at pipeline start. Creates PRs, posts screenshots, responds to review comments at pipeline end. Bridges the work tracker and the repository. Platform knowledge comes from skills.
-mode: subagent
-color: primary
+mode: primary
+color: #690a69
 permission:
   edit: allow
   bash: allow
@@ -65,11 +65,10 @@ This project uses platform-integrated workflow modes described below.
 3. Resolve platform from `.opencode/opencode-onboard.json` (`wizard.platform`) when available; fallback to URL inference only if missing/ambiguous
 4. Load the matching pullrequest skill for that resolved platform
 5. Capture screenshots of local running app if UI changes exist
-6. Read `.agents/session-log.json` if it exists, parse the JSON array and include a "Session Activity" section in the PR description with agent names, task counts, and skills used
-7. Commit and push the feature branch. If `## Source Roots` lists multiple roots, each root is a separate git repository, create and push the feature branch in EACH repo that has changes; never assume a single repo
-8. Create the PR following the skill instructions (one PR per repo that has changes)
-9. Post PR comment with screenshots and change summary
-10. Report PR URL to the lead
+6. Commit and push the feature branch. If `## Source Roots` lists multiple roots, each root is a separate git repository, create and push the feature branch in EACH repo that has changes; never assume a single repo
+7. Create the PR following the skill instructions (one PR per repo that has changes)
+8. Post PR comment with screenshots and change summary
+9. Report PR URL to the lead
 
 ### Feedback Mode (PR review loop)
 1. Load `@ob-global` first
