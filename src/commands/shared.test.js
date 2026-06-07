@@ -1,13 +1,20 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
-import { readOnboardConfig } from './shared.js'
+
+vi.mock('execa', () => ({
+  execa: vi.fn(),
+}))
+
+import { execa } from 'execa'
+import { ensureGitLongpaths, readOnboardConfig } from './shared.js'
 
 describe('readOnboardConfig()', () => {
   let tmpDir, originalCwd
 
   beforeEach(() => {
+    vi.clearAllMocks()
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'shared-test-'))
     originalCwd = process.cwd()
     process.chdir(tmpDir)
@@ -52,5 +59,38 @@ describe('readOnboardConfig()', () => {
     const result = await readOnboardConfig()
 
     expect(result).toBeNull()
+  })
+})
+
+describe('ensureGitLongpaths()', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('configures core.longpaths in a git repository', async () => {
+    execa
+      .mockResolvedValueOnce({ exitCode: 0, stdout: 'true' })
+      .mockResolvedValueOnce({ exitCode: 0, stdout: '', stderr: '' })
+
+    const result = await ensureGitLongpaths('C:/repo')
+
+    expect(result).toBe(true)
+    expect(execa).toHaveBeenNthCalledWith(1, 'git', ['rev-parse', '--is-inside-work-tree'], {
+      cwd: 'C:/repo',
+      reject: false,
+    })
+    expect(execa).toHaveBeenNthCalledWith(2, 'git', ['config', 'core.longpaths', 'true'], {
+      cwd: 'C:/repo',
+      reject: false,
+    })
+  })
+
+  it('skips configuration outside a git repository', async () => {
+    execa.mockResolvedValueOnce({ exitCode: 1, stdout: '', stderr: '' })
+
+    const result = await ensureGitLongpaths('C:/not-a-repo')
+
+    expect(result).toBe(false)
+    expect(execa).toHaveBeenCalledTimes(1)
   })
 })

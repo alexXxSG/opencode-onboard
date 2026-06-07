@@ -1,5 +1,6 @@
 import { select as wizardSelect } from '@inquirer/prompts'
 import chalk from 'chalk'
+import { ensureGitLongpaths } from './shared.js'
 import { chooseSourceScope } from '../steps/source/index.js'
 import { cleanAiFiles } from '../steps/clean/index.js'
 import { choosePlatform } from '../steps/platform/index.js'
@@ -48,6 +49,9 @@ export async function runWizard(version) {
       })
     })
   }
+
+  const longpathsConfigured = await ensureGitLongpaths()
+  if (longpathsConfigured) console.log(chalk.dim('  Git long paths enabled for this repository.'))
 
   const scope = await chooseSourceScope()
 
