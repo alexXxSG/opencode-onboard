@@ -77,18 +77,19 @@ async function init() {
   try {
     const result = await execa(
       "npx",
-      ["@fission-ai/openspec", "/ob-init", "--tools", "opencode", "--force"],
+      ["@fission-ai/openspec", "init", "--tools", "opencode", "--force"],
       {
         cwd: process.cwd(),
-        stdio: "pipe",
         reject: false,
       },
     )
 
     if (result.exitCode !== 0) {
-      throw new Error(
-        `init failed with exit code ${result.exitCode}, check output above`,
-      )
+      const stderr = (result.stderr || "").trim()
+      const msg = stderr
+        ? `init failed: ${stderr}`
+        : `init failed with exit code ${result.exitCode}`
+      throw new Error(msg)
     }
   } catch (err) {
     error(`Failed to run openspec init: ${err.message}`)

@@ -1,6 +1,6 @@
 {
   "name": "opencode-onboard",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "Prepare any codebase for AI agent workflows using OpenCode, OpenSpec, and ensemble orchestration.",
   "keywords": [
     "opencode",
