@@ -8,150 +8,53 @@ vi.mock('../../utils/exec.js', () => ({
 }))
 
 import { success } from '../../utils/exec.js'
-import { writeModelToAgent, writeModelsToConfigs } from './write.js'
-
-describe('writeModelToAgent()', () => {
-  let tmpDir
-
-  beforeEach(() => {
-    vi.clearAllMocks()
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'models-write-test-'))
-  })
-
-  afterEach(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true })
-  })
-
-  it('adds model field to agent file frontmatter', async () => {
-    const filePath = path.join(tmpDir, 'test-agent.md')
-    const original = `---
-name: Test Agent
-description: A test agent
----
-
-# Test Agent`
-    fs.writeFileSync(filePath, original, 'utf-8')
-
-    await writeModelToAgent(filePath, 'anthropic/claude-3-sonnet')
-
-    const updated = fs.readFileSync(filePath, 'utf-8')
-    expect(updated).toContain('model: anthropic/claude-3-sonnet')
-  })
-
-  it('preserves existing frontmatter fields', async () => {
-    const filePath = path.join(tmpDir, 'test-agent.md')
-    const original = `---
-name: Test Agent
-description: A test agent
-custom_field: custom_value
----
-
-# Test Agent`
-    fs.writeFileSync(filePath, original, 'utf-8')
-
-    await writeModelToAgent(filePath, 'test/model')
-
-    const updated = fs.readFileSync(filePath, 'utf-8')
-    expect(updated).toContain('name: Test Agent')
-    expect(updated).toContain('description: A test agent')
-    expect(updated).toContain('custom_field: custom_value')
-    expect(updated).toContain('model: test/model')
-  })
-
-  it('removes model field when no model is selected', async () => {
-    const filePath = path.join(tmpDir, 'test-agent.md')
-    const original = `---
-name: Test Agent
-model: existing/model
-description: A test agent
----
-
-# Test Agent`
-    fs.writeFileSync(filePath, original, 'utf-8')
-
-    await writeModelToAgent(filePath, null)
-
-    const updated = fs.readFileSync(filePath, 'utf-8')
-    expect(updated).not.toContain('model:')
-    expect(updated).toContain('description: A test agent')
-  })
-})
+import { writeModelsToConfigs } from './write.js'
 
 describe('writeModelsToConfigs()', () => {
-  let tmpDir, agentsDir, opencodeJsonPath
+  let tmpDir, opencodeDir
 
   beforeEach(() => {
     vi.clearAllMocks()
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'models-config-test-'))
-    agentsDir = path.join(tmpDir, '.agents', 'agents')
-    fs.mkdirSync(agentsDir, { recursive: true })
-    opencodeJsonPath = path.join(tmpDir, '.opencode', 'opencode.json')
-    path.join(tmpDir, '.opencode', 'ensemble.json')
-    fs.mkdirSync(path.dirname(opencodeJsonPath), { recursive: true })
+    opencodeDir = path.join(tmpDir, '.opencode')
+    fs.mkdirSync(opencodeDir, { recursive: true })
   })
 
   afterEach(() => {
     fs.rmSync(tmpDir, { recursive: true, force: true })
   })
 
-  it('writes build model to agent files', async () => {
-    fs.writeFileSync(path.join(agentsDir, 'basic-engineer.md'), '---\nname: Basic\n---', 'utf-8')
-    fs.writeFileSync(path.join(agentsDir, 'frontend-engineer.md'), '---\nname: Front\n---', 'utf-8')
-    fs.writeFileSync(path.join(agentsDir, 'devops-manager.md'), '---\nname: Devops\n---', 'utf-8')
+  it('writes build model to opencode.json', async () => {
+    const opencodeJsonPath = path.join(opencodeDir, 'opencode.json')
+    fs.writeFileSync(opencodeJsonPath, JSON.stringify({ theme: 'dark' }, null, 2), 'utf-8')
 
-    await writeModelsToConfigs({
-      planModel: 'plan-model',
-      buildModel: 'build-model',
-      fastModel: 'fast-model',
-      agentsDir,
-      cwd: tmpDir,
-      preset: {
-        roles: {
-          build: { agents: ['basic-engineer'] },
-          fast: { agents: ['devops-manager'] },
-        },
-      },
-    })
+    await writeModelsToConfigs({ planModel: 'plan-model', buildModel: 'build-model', fastModel: 'fast-model', cwd: tmpDir })
 
-    expect(success).toHaveBeenCalledWith('basic-engineer → build-model')
-    expect(success).toHaveBeenCalledWith('frontend-engineer → build-model')
-    expect(success).toHaveBeenCalledWith('devops-manager → fast-model')
+    const config = JSON.parse(fs.readFileSync(opencodeJsonPath, 'utf-8'))
+    expect(config.model).toBe('build-model')
+    expect(success).toHaveBeenCalledWith(expect.stringContaining('build-model'))
   })
 
-  it('reports success when writing configs', async () => {
-    const agentFile = path.join(agentsDir, 'basic-engineer.md')
-    fs.writeFileSync(agentFile, '---\nname: Basic\n---', 'utf-8')
+  it('writes all three models to ensemble.json modelsByAgent', async () => {
+    const ensembleJsonPath = path.join(opencodeDir, 'ensemble.json')
+    fs.writeFileSync(ensembleJsonPath, JSON.stringify({ dashboardPort: 4747 }, null, 2), 'utf-8')
 
-    await writeModelsToConfigs({
-      planModel: 'plan-model',
-      buildModel: 'build-model',
-      fastModel: 'fast-model',
-      agentsDir,
-      cwd: tmpDir,
-      preset: { roles: { build: { agents: ['basic-engineer'] }, fast: { agents: [] } } },
-    })
+    await writeModelsToConfigs({ planModel: 'plan-model', buildModel: 'build-model', fastModel: 'fast-model', cwd: tmpDir })
 
-    expect(success).toHaveBeenCalled()
+    const ensemble = JSON.parse(fs.readFileSync(ensembleJsonPath, 'utf-8'))
+    expect(ensemble.modelsByAgent.plan).toBe('plan-model')
+    expect(ensemble.modelsByAgent.build).toBe('build-model')
+    expect(ensemble.modelsByAgent.explore).toBe('fast-model')
   })
 
-  it('removes model config entries when None is selected', async () => {
-    const agentFile = path.join(agentsDir, 'basic-engineer.md')
-    const ensembleJsonPath = path.join(tmpDir, '.opencode', 'ensemble.json')
-
-    fs.writeFileSync(agentFile, '---\nname: Basic\nmodel: existing/model\n---', 'utf-8')
-    fs.writeFileSync(opencodeJsonPath, JSON.stringify({ model: 'existing/model', theme: 'dark' }, null, 2), 'utf-8')
+  it('removes model entries when null is passed', async () => {
+    const opencodeJsonPath = path.join(opencodeDir, 'opencode.json')
+    const ensembleJsonPath = path.join(opencodeDir, 'ensemble.json')
+    fs.writeFileSync(opencodeJsonPath, JSON.stringify({ model: 'old-model', theme: 'dark' }, null, 2), 'utf-8')
     fs.writeFileSync(ensembleJsonPath, JSON.stringify({ modelsByAgent: { plan: 'a', build: 'b', explore: 'c', keep: 'yes' } }, null, 2), 'utf-8')
 
-    await writeModelsToConfigs({
-      planModel: null,
-      buildModel: null,
-      fastModel: null,
-      agentsDir,
-      cwd: tmpDir,
-      preset: { roles: { build: { agents: ['basic-engineer'] }, fast: { agents: [] } } },
-    })
+    await writeModelsToConfigs({ planModel: null, buildModel: null, fastModel: null, cwd: tmpDir })
 
-    expect(fs.readFileSync(agentFile, 'utf-8')).not.toContain('model:')
     expect(JSON.parse(fs.readFileSync(opencodeJsonPath, 'utf-8'))).toEqual({ theme: 'dark' })
     expect(JSON.parse(fs.readFileSync(ensembleJsonPath, 'utf-8'))).toEqual({ modelsByAgent: { keep: 'yes' } })
     expect(success).not.toHaveBeenCalled()

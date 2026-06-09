@@ -2,66 +2,25 @@ import fse from 'fs-extra'
 import path from 'path'
 import { success } from '../../utils/exec.js'
 
-function updateFrontmatterModel(content, modelId) {
-  return content.replace(
-    /^(---\n)([\s\S]*?)(\n---)/m,
-    (_, start, body, end) => {
-      const withoutModel = body.replace(/^model:\s.*\n?/m, '').replace(/\n+$/, '')
-      const nextBody = modelId ? `${withoutModel}\nmodel: ${modelId}` : withoutModel
-      return `${start}${nextBody}${end}`
-    }
-  )
-}
-
-export async function writeModelToAgent(agentFile, modelId) {
-  const content = await fse.readFile(agentFile, 'utf-8');
-  const updated = updateFrontmatterModel(content, modelId)
-  await fse.writeFile(agentFile, updated, 'utf-8');
-}
-
-async function listBuildAgentNames(agentsDir, preset) {
-  const fastAgents = new Set(preset.roles.fast.agents)
-  const configuredBuildAgents = preset.roles.build.agents
-  const discovered = await fse.pathExists(agentsDir)
-    ? (await fse.readdir(agentsDir))
-      .filter(name => name.endsWith('.md'))
-      .map(name => path.basename(name, '.md'))
-      .filter(name => !fastAgents.has(name))
-    : []
-
-  return [...new Set([...configuredBuildAgents, ...discovered])]
-}
-
-export async function writeModelsToConfigs({ planModel, buildModel, fastModel, agentsDir, preset, cwd = process.cwd() }) {
-  for (const name of await listBuildAgentNames(agentsDir, preset)) {
-    const file = path.join(agentsDir, `${name}.md`);
-    if (await fse.pathExists(file)) {
-      await writeModelToAgent(file, buildModel);
-      if (buildModel) success(`${name} → ${buildModel}`);
-    }
-  }
-
-  for (const name of preset.roles.fast.agents) {
-    const file = path.join(agentsDir, `${name}.md`);
-    if (await fse.pathExists(file)) {
-      await writeModelToAgent(file, fastModel);
-      if (fastModel) success(`${name} → ${fastModel}`);
-    }
-  }
-
-  const opencodeJsonPath = path.join(cwd, '.opencode', 'opencode.json');
+/**
+ * Writes selected models to ensemble.json (modelsByAgent) and opencode.json (default model).
+ * Agent files no longer receive a model: field — models are assigned per task during /opsx-propose
+ * and read from opencode-onboard.json wizard.models at spawn time.
+ */
+export async function writeModelsToConfigs({ planModel, buildModel, fastModel, cwd = process.cwd() }) {
+  const opencodeJsonPath = path.join(cwd, '.opencode', 'opencode.json')
   if (await fse.pathExists(opencodeJsonPath)) {
-    const config = await fse.readJson(opencodeJsonPath);
-    if (buildModel) config.model = buildModel;
-    else delete config.model;
-    await fse.writeJson(opencodeJsonPath, config, { spaces: 2 });
-    if (buildModel) success(`default model -> ${buildModel} (written to .opencode/opencode.json)`);
+    const config = await fse.readJson(opencodeJsonPath)
+    if (buildModel) config.model = buildModel
+    else delete config.model
+    await fse.writeJson(opencodeJsonPath, config, { spaces: 2 })
+    if (buildModel) success(`default model -> ${buildModel} (written to .opencode/opencode.json)`)
   }
 
-  const ensembleJsonPath = path.join(cwd, '.opencode', 'ensemble.json');
+  const ensembleJsonPath = path.join(cwd, '.opencode', 'ensemble.json')
   if (await fse.pathExists(ensembleJsonPath)) {
-    const ensemble = await fse.readJson(ensembleJsonPath);
-    delete ensemble.defaultModel;
+    const ensemble = await fse.readJson(ensembleJsonPath)
+    delete ensemble.defaultModel
     const modelsByAgent = { ...ensemble.modelsByAgent }
     if (planModel) modelsByAgent.plan = planModel
     else delete modelsByAgent.plan
@@ -73,9 +32,9 @@ export async function writeModelsToConfigs({ planModel, buildModel, fastModel, a
     if (Object.keys(modelsByAgent).length > 0) ensemble.modelsByAgent = modelsByAgent
     else delete ensemble.modelsByAgent
 
-    await fse.writeJson(ensembleJsonPath, ensemble, { spaces: 2 });
-    if (planModel) success(`plan model -> ${planModel} (written to .opencode/ensemble.json)`);
-    if (buildModel) success(`build model -> ${buildModel} (written to .opencode/ensemble.json)`);
-    if (fastModel) success(`fast model -> ${fastModel} (written to .opencode/ensemble.json)`);
+    await fse.writeJson(ensembleJsonPath, ensemble, { spaces: 2 })
+    if (planModel) success(`plan model -> ${planModel} (written to .opencode/ensemble.json)`)
+    if (buildModel) success(`build model -> ${buildModel} (written to .opencode/ensemble.json)`)
+    if (fastModel) success(`fast model -> ${fastModel} (written to .opencode/ensemble.json)`)
   }
 }

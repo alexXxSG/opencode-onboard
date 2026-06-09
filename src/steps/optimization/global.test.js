@@ -9,13 +9,9 @@ vi.mock('../../utils/exec.js', () => ({
   warn: vi.fn(),
 }))
 
-import { configureObGlobal } from './global.js'
+import { configureAgentsMd } from './global.js'
 
-const SKILL_TEMPLATE = `## Token Optimization Rules
-
-<!-- OB-SOURCE-ROOTS-START -->
-placeholder
-<!-- OB-SOURCE-ROOTS-END -->
+const AGENTS_TEMPLATE = `## Optimizations
 
 <!-- OB-RTK-START -->
 placeholder
@@ -28,18 +24,20 @@ placeholder
 <!-- OB-CODEGRAPH-START -->
 placeholder
 <!-- OB-CODEGRAPH-END -->
+
+<!-- OB-MEMORY-START -->
+placeholder
+<!-- OB-MEMORY-END -->
 `
 
-describe('configureObGlobal()', () => {
+describe('configureAgentsMd()', () => {
   let tmpDir
-  let skillPath
+  let agentsMdPath
 
   beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ob-global-test-'))
-    const skillDir = path.join(tmpDir, '.agents', 'skills', 'ob-global')
-    fs.mkdirSync(skillDir, { recursive: true })
-    skillPath = path.join(skillDir, 'SKILL.md')
-    fs.writeFileSync(skillPath, SKILL_TEMPLATE, 'utf-8')
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agents-md-test-'))
+    agentsMdPath = path.join(tmpDir, 'AGENTS.md')
+    fs.writeFileSync(agentsMdPath, AGENTS_TEMPLATE, 'utf-8')
     vi.spyOn(process, 'cwd').mockReturnValue(tmpDir)
   })
 
@@ -48,55 +46,39 @@ describe('configureObGlobal()', () => {
     vi.restoreAllMocks()
   })
 
-  it('returns configured:false when ob-global skill is missing', async () => {
-    fs.rmSync(skillPath)
-    const result = await configureObGlobal()
+  it('returns configured:false when AGENTS.md is missing', async () => {
+    fs.rmSync(agentsMdPath)
+    const result = await configureAgentsMd()
     expect(result).toEqual({ configured: false })
   })
 
-  it('injects source roots section', async () => {
-    await configureObGlobal({ sourceRoots: [tmpDir] }, {})
-    const content = fs.readFileSync(skillPath, 'utf-8')
-    expect(content).toContain('Read and analyze code ONLY from these roots')
-  })
-
   it('injects RTK section when rtk is opted in', async () => {
-    await configureObGlobal({}, { rtk: { optedIn: true } })
-    const content = fs.readFileSync(skillPath, 'utf-8')
+    await configureAgentsMd({ rtk: { optedIn: true } })
+    const content = fs.readFileSync(agentsMdPath, 'utf-8')
     expect(content).toContain('RTK, MANDATORY')
-    expect(content).toContain('NO automatic hook in OpenCode')
-    expect(content).toContain('rtk pnpm build')
-    expect(content).toContain('rtk npx tsc')
-  })
-
-  it('injects RTK not-selected note when rtk is not opted in', async () => {
-    await configureObGlobal({}, { rtk: { optedIn: false } })
-    const content = fs.readFileSync(skillPath, 'utf-8')
-    expect(content).toContain('RTK was not selected during onboarding')
   })
 
   it('injects caveman section when caveman is opted in', async () => {
-    await configureObGlobal({}, { caveman: { optedIn: true } })
-    const content = fs.readFileSync(skillPath, 'utf-8')
-    expect(content).toContain('caveman mode')
+    await configureAgentsMd({ caveman: { optedIn: true } })
+    const content = fs.readFileSync(agentsMdPath, 'utf-8')
+    expect(content).toContain('Caveman mode active')
   })
 
   it('injects codegraph section when codegraph is opted in', async () => {
-    await configureObGlobal({}, { codegraph: { optedIn: true } })
-    const content = fs.readFileSync(skillPath, 'utf-8')
+    await configureAgentsMd({ codegraph: { optedIn: true } })
+    const content = fs.readFileSync(agentsMdPath, 'utf-8')
     expect(content).toContain('CodeGraph')
-    expect(content).toContain('codegraph_explore')
   })
 
-  it('injects codegraph not-selected note when codegraph is not opted in', async () => {
-    await configureObGlobal({}, { codegraph: { optedIn: false } })
-    const content = fs.readFileSync(skillPath, 'utf-8')
-    expect(content).toContain('Codegraph was not selected during onboarding')
+  it('injects memory section when memory is opted in', async () => {
+    await configureAgentsMd({ memory: { optedIn: true } })
+    const content = fs.readFileSync(agentsMdPath, 'utf-8')
+    expect(content).toContain('Basic Memory')
   })
 
-  it('returns configured:true with skill path on success', async () => {
-    const result = await configureObGlobal({}, {})
+  it('returns configured:true on success', async () => {
+    const result = await configureAgentsMd({})
     expect(result.configured).toBe(true)
-    expect(result.path).toBe(skillPath)
+    expect(result.path).toBe(agentsMdPath)
   })
 })

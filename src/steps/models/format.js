@@ -1,4 +1,4 @@
-import { search } from '@inquirer/prompts'
+import { search, select } from '@inquirer/prompts'
 import fse from 'fs-extra'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -66,6 +66,18 @@ export function pickModel(message, models) {
     message,
     source: input => buildModelChoices(input, models),
   });
+}
+
+export function filterModelsByProvider(models, provider) {
+  if (!provider) return models
+  return models.filter(m => m.id.startsWith(`${provider}/`))
+}
+
+export function pickProvider(message) {
+  return select({
+    message,
+    choices: modelsPreset.providers.map(p => ({ value: p.value, name: p.name })),
+  })
 }
 
 export { modelsPreset };

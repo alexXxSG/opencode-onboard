@@ -1,8 +1,24 @@
 import path from 'path'
 import { header, info, success, warn } from '../../utils/exec.js'
 import { fetchModels } from '../../utils/models-cache.js'
-import { buildDisplayModels, modelsPreset, pickModel } from './format.js'
+import { buildDisplayModels, filterModelsByProvider, modelsPreset, pickModel, pickProvider } from './format.js'
 import { writeModelsToConfigs } from './write.js'
+
+async function pickRoleModel(role, allModels) {
+  const rolePreset = modelsPreset.roles[role]
+  for (const line of rolePreset.info) info(line)
+  console.log()
+
+  const provider = await pickProvider('Provider:')
+  const filtered = filterModelsByProvider(allModels, provider)
+  const available = filtered.length > 0 ? filtered : allModels
+
+  const suggestion = rolePreset.suggestions?.[provider]
+  if (suggestion) info(`  Suggested: ${suggestion}`)
+  if (filtered.length === 0 && provider) warn(`  No ${provider} models found — showing all`)
+
+  return pickModel(rolePreset.prompt, available)
+}
 
 export async function chooseModels() {
   header('Step 7, Choose models');
@@ -12,7 +28,7 @@ export async function chooseModels() {
 
   if (!rawModels) {
     warn('Could not fetch models (offline and no cache). Skipping model selection.');
-    warn('Set models later in .opencode/agents/<name>.md and .opencode/opencode.json');
+    warn('Set models later in .opencode/opencode.json');
     return;
   }
 
@@ -26,27 +42,18 @@ export async function chooseModels() {
   success(`${models.length} models available`);
   console.log();
   info('Cost indicators: [$] cheap  [$$] mid  [$$$] expensive');
-  info('Type to search. Change selections later in .opencode/agents/ and .opencode/opencode.json');
+  info('Pick provider first, then search by name. Change later in .opencode/opencode.json');
   console.log();
 
-  for (const line of modelsPreset.roles.plan.info) info(line);
-  const planModel = await pickModel(modelsPreset.roles.plan.prompt, models);
-  console.log();
+  const planModel  = await pickRoleModel('plan',  models); console.log();
+  const buildModel = await pickRoleModel('build', models); console.log();
+  const fastModel  = await pickRoleModel('fast',  models); console.log();
 
-  for (const line of modelsPreset.roles.build.info) info(line);
-  const buildModel = await pickModel(modelsPreset.roles.build.prompt, models);
-  console.log();
-
-  for (const line of modelsPreset.roles.fast.info) info(line);
-  const fastModel = await pickModel(modelsPreset.roles.fast.prompt, models);
-  console.log();
-
-  const agentsDir = path.join(process.cwd(), '.opencode', 'agents');
-  await writeModelsToConfigs({ planModel, buildModel, fastModel, agentsDir, preset: modelsPreset });
+  await writeModelsToConfigs({ planModel, buildModel, fastModel });
 
   console.log();
   warn('Make sure you have API access to the selected models.');
-  warn('Change them anytime in .opencode/agents/<name>.md and .opencode/opencode.json');
+  warn('Change them anytime in .opencode/opencode.json');
 
   return { planModel, buildModel, fastModel };
 }

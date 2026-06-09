@@ -1,5 +1,5 @@
 ---
-name: ob-userstory-gh
+name: ob-userstory
 description: Parse GitHub Issue URL and create OpenSpec change. Use when user provides a GitHub Issue URL.
 license: MIT
 compatibility: Requires openspec CLI and gh CLI.
@@ -114,7 +114,7 @@ https://github.com/{owner}/{repo}/blob/{sha}/{path}
 **Change Created:** gh-{number}-{slug}
 ```
 
-After outputting the above, the lead MUST run `/opsx-propose` to generate the proposal, specs, and tasks. After `/opsx-propose` completes, STOP and ask the user: **"Ready to implement? (yes/no)"**, do NOT proceed to `/opsx-apply` until confirmed.
+After outputting the above, the lead MUST run `/ob-propose` to generate the proposal, specs, and tasks. After `/ob-propose` completes, STOP and ask the user: **"Ready to implement? (yes/no)"**, do NOT proceed to `/ob-apply` until confirmed.
 
 ---
 
@@ -122,8 +122,8 @@ After outputting the above, the lead MUST run `/opsx-propose` to generate the pr
 
 - ✅ Parse GitHub Issue URL and create OpenSpec change
 - ✅ Use `gh` CLI for all GitHub operations
-- ✅ Always run `/opsx-propose` after parsing, never skip to implementation
-- ✅ Always stop and confirm with user after propose, before running `/opsx-apply`
+- ✅ Always run `/ob-propose` after parsing, never skip to implementation
+- ✅ Always stop and confirm with user after propose, before running `/ob-apply`
 - ❌ `webfetch` or HTTP requests to GitHub URLs, FORBIDDEN, use `gh` CLI only
 - ❌ Browser MCP tools for GitHub operations, FORBIDDEN
 - ❌ Jump to implementation without user confirmation, FORBIDDEN

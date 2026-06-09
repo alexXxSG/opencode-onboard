@@ -4,29 +4,61 @@
     { "max": 10, "label": "[$$]" },
     { "label": "[$$$]" }
   ],
+  "providers": [
+    { "value": "opencode", "name": "OpenCode" },
+    { "value": "github",   "name": "GitHub Copilot" },
+    { "value": "anthropic","name": "Anthropic" },
+    { "value": "google",   "name": "Google" },
+    { "value": "openai",   "name": "OpenAI" },
+    { "value": "deepseek", "name": "DeepSeek" },
+    { "value": "",         "name": "Other (show all)" }
+  ],
   "roles": {
     "plan": {
       "prompt": "Plan model:",
       "info": [
-        "PLAN model: used by the main agent to read issues, write proposals, coordinate the team.",
-        "This model needs to be strong. Use Claude Sonnet/Opus, GPT-4o, o3, or equivalent.",
-        "A weak model here will silently skip steps and break the workflow."
-      ]
+        "PLAN — main session: reads issues, writes proposals, coordinates the agent team.",
+        "Needs to be strong. A weak model here will silently skip steps and break the workflow."
+      ],
+      "suggestions": {
+        "opencode":  null,
+        "github":    "github/claude-sonnet-4-5",
+        "anthropic": "anthropic/claude-sonnet-4-5",
+        "google":    "google/gemini-2.5-pro",
+        "openai":    "openai/o3",
+        "deepseek":  null
+      }
     },
     "build": {
       "prompt": "Build model:",
       "info": [
-        "BUILD model: used by basic-engineer and any custom engineer created in the project.",
-        "Needs to be capable for implementation work. Claude Sonnet, GPT-4o, or equivalent."
+        "BUILD — engineers: implements code, runs tests, commits.",
+        "Code quality matters here. DeepSeek V3 is outstanding value. Claude Sonnet is the gold standard."
       ],
+      "suggestions": {
+        "opencode":  null,
+        "github":    "github/claude-sonnet-4-5",
+        "anthropic": "anthropic/claude-sonnet-4-5",
+        "google":    "google/gemini-2.5-flash",
+        "openai":    "openai/gpt-4.1",
+        "deepseek":  "deepseek/deepseek-v3"
+      },
       "agents": ["basic-engineer"]
     },
     "fast": {
       "prompt": "Fast model:",
       "info": [
-        "FAST model: used by devops-manager for reading issues and classifying PR comments.",
-        "Something fast and cheap is fine here, no heavy reasoning needed."
+        "FAST — devops-manager: reads work items, classifies PR comments, light orchestration.",
+        "No heavy reasoning needed. Cheap and fast is the right call here."
       ],
+      "suggestions": {
+        "opencode":  "opencode/big-pickle",
+        "github":    "github/gpt-4o-mini",
+        "anthropic": "anthropic/claude-haiku-4-5",
+        "google":    "google/gemini-2.0-flash",
+        "openai":    "openai/gpt-4o-mini",
+        "deepseek":  null
+      },
       "agents": ["devops-manager"]
     }
   }

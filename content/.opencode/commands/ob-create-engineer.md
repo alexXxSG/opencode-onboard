@@ -95,7 +95,7 @@ Example: `/ob-create-engineer frontend-engineer "A frontend engineer specialized
    Report:
     - Agent file created at `.opencode/agents/<name>-engineer.md`
    - Skills installed (list each with source)
-   - How to use: "This agent will be spawned by the lead during `/opsx-apply` for tasks matching its specialty."
+   - How to use: "This agent will be spawned by the lead during `/ob-apply` for tasks matching its specialty."
 
 **Guidelines**
 - Always keep `@ob-generic-guardrails` in the Guardrails ability

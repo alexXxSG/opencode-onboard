@@ -1,5 +1,5 @@
 ---
-name: ob-pullrequest-gh
+name: ob-pullrequest
 description: Create GitHub PRs with screenshots, or read and triage PR review feedback. Use when shipping a feature branch or when user says "I've added comments to the PR".
 license: MIT
 compatibility: Requires gh CLI, openspec CLI, and opencode-browser for screenshots.

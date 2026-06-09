@@ -39,7 +39,7 @@ describe('platform patching', () => {
 
     const content = await fse.readFile(dest, 'utf-8')
     expect(content).toContain('Selected platform: `none`')
-    expect(content).toContain('Do NOT load `ob-userstory-gh`, `ob-userstory-az`, `ob-pullrequest-gh`, or `ob-pullrequest-az`.')
+    expect(content).toContain('Do NOT load `ob-userstory`')
     expect(content).toContain('This project does not use GitHub or Azure DevOps integration.')
   })
 })

@@ -100,7 +100,6 @@ Custom slash commands are installed into `.opencode/commands/` and are available
 | Command        | Description                                                                                           |
 | -------------- | ----------------------------------------------------------------------------------------------------- |
 | `/ob-init`        | Initialize the project. Asks greenfield vs brownfield, then activates the agent team. Supports skipping doc generation for new projects. |
-| `/ob-plan <url>`  | Parse a user story URL and produce a plan, proposal, specs, and tasks. Stops before implementation. Use platform mode, not `None`.   |
 | `/ob-main <task>` | Quick direct implementation, no OpenSpec, no ensemble, no PRs. Just do it.                            |
 | `/ob-create-engineer <name> "<description>"` | Create a custom engineer agent from a description, with skills auto-installed from [skills.sh](https://www.skills.sh/) |
 | `/ob-create-architecture` | Generate or regenerate `ARCHITECTURE.md` from the codebase. Safe to rerun any time the architecture changes. |
@@ -124,7 +123,7 @@ basic-engineer     implementation worker, ability-driven
 ```
 
 `basic-engineer` behavior is composed by abilities, not hardcoded role silos.
-Project-specific specialization comes from user-created custom engineers via `/ob-create-engineer`. During `/opsx-apply`, the lead should inspect the engineers that actually exist in `.opencode/agents/`, prefer matching custom engineers, and fall back to `basic-engineer` only when no specialist is a clear fit.
+Project-specific specialization comes from user-created custom engineers via `/ob-create-engineer`. During `/ob-apply`, the lead should inspect the engineers that actually exist in `.opencode/agents/`, prefer matching custom engineers, and fall back to `basic-engineer` only when no specialist is a clear fit.
 
 ### Skills, platform knowledge
 
@@ -202,9 +201,9 @@ devops-manager (load ob-global first)
 
 1. Load `ob-global` baseline rules
 2. Load platform userstory skill (`ob-userstory-gh` or `ob-userstory-az`)
-3. Run `/opsx-propose` to produce `proposal.md`, specs, and `tasks.md`
+3. Run `/ob-propose` to produce `proposal.md`, specs, and `tasks.md`
 4. Confirm with user before implementation
-5. Run `/opsx-apply` to orchestrate implementation workers
+5. Run `/ob-apply` to orchestrate implementation workers
 6. Spawn one or more engineers in parallel (`basic-engineer` and/or custom engineers)
 7. Each engineer claims tasks, loads relevant abilities, and executes
 8. Verify with tests/build/lint according to task scope
@@ -284,9 +283,9 @@ Long unattended agent sessions can consume significant tokens. Set these control
 
 3. **Install the quota plugin** — the [`opencode-quota`](https://github.com/opencode-ai/opencode-quota) plugin adds `/quota` and `/quota_status` commands that surface real-time token usage inside OpenCode sessions.
 
-4. **Use `/quota` checkpoints** — run `/quota` before starting any `/opsx-apply` session and after each agent wave. Pause at 75% consumed; stop at 90%.
+4. **Use `/quota` checkpoints** — run `/quota` before starting any `/ob-apply` session and after each agent wave. Pause at 75% consumed; stop at 90%.
 
-5. **Confirm before large runs** — the onboarded `/opsx-apply` workflow will ask for your confirmation before spawning agents for Medium (4–7 tasks) or High (8+ tasks) scope sessions.
+5. **Confirm before large runs** — the onboarded `/ob-apply` workflow will ask for your confirmation before spawning agents for Medium (4–7 tasks) or High (8+ tasks) scope sessions.
 
 ---
 

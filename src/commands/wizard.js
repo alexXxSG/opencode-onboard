@@ -116,6 +116,12 @@ export async function runWizard(version) {
   console.log()
   console.log('  Open this project in OpenCode and type:')
   console.log(chalk.bold('  "/ob-init"'))
+  console.log('  Or run the following command in your terminal:')
+  console.log(chalk.bold('  opencode --prompt "/ob-init" --model "opencode/big-pickle"  '))
+  console.log()
+  console.log(chalk.dim('  Note: the first time you open OpenCode in this project,'))
+  console.log(chalk.dim('  it will install plugin dependencies. You may see a black'))
+  console.log(chalk.dim('  screen for a moment — this is normal. Wait for it to load.'))
   console.log()
   if (toGenerate.length > 0) {
     console.log(`  OpenCode will generate ${toGenerate.join(' and ')}`)

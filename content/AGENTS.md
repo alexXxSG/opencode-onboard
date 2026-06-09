@@ -180,16 +180,11 @@ This file provides guidance to AI agents when working in this repository.
 This is the agent orchestration layer for your project. It provides:
 - Universal agent team for development workflow
 - OpenSpec change management
-- Mandatory global baseline skill (`ob-global`) for all agents
-- Additional skills for platform/task-specific knowledge
+- Skills for platform and task-specific knowledge
 
-## Source Scope
+## Context
 
-Source scope is defined by mandatory `ob-global` skill.
-
-- Load `ob-global` first.
-- Follow the generated `## Source Roots` section from that skill.
-- Do not duplicate source-scope rules here.
+Load DESIGN.md for design principles and guidelines. Load ARCHITECTURE.md for system architecture and component interactions. These files are generated during initialization and updated as the codebase evolves.
 
 ## I Am the Lead, Full Workflow Ownership
 
@@ -197,9 +192,9 @@ Source scope is defined by mandatory `ob-global` skill.
 When the user provides a work item URL or says "implement the plan" or "I've added comments to the PR", **I own the full lifecycle**. I load `ob-global` skill first, then the appropriate userstory skill, and use ensemble tools to coordinate the agent team.
 
 Trigger patterns, I recognize ALL of these, exact wording does not matter:
-- User pastes or mentions a GitHub Issue URL → load `ob-userstory-gh` skill → parse issue → run `/opsx-propose` → confirm with user → run `/opsx-apply` → ship
-- User pastes or mentions an Azure DevOps URL → load `ob-userstory-az` skill → parse work item → run `/opsx-propose` → confirm with user → run `/opsx-apply` → ship
-- `implement the plan` / `implement` / `start` / `go` → run `/opsx-apply` → ship
+- User pastes or mentions a GitHub Issue URL → load `ob-userstory` skill → parse issue → run `/ob-propose` → confirm with user → run `/ob-apply` → ship
+- User pastes or mentions an Azure DevOps URL → load `ob-userstory` skill → parse work item → run `/ob-propose` → confirm with user → run `/ob-apply` → ship
+- `implement the plan` / `implement` / `start` / `go` → run `/ob-apply` → ship
 - `I've added comments to the PR` → read PR comments → fix → update PR
 - Any GitHub/Azure DevOps PR URL in a feedback/fix request (e.g. "check comments", "fix PR feedback") → run PR Feedback Loop
 
@@ -276,9 +271,9 @@ devops-manager (ship mode)
 ### Phase 1, Parse & Propose
 
 ```
-1. Detect URL type → load matching skill (ob-userstory-gh or ob-userstory-az)
+1. Detect URL type → load matching skill (ob-userstory or ob-userstory)
 2. Follow skill steps: fetch issue/work item via CLI, create OpenSpec change
-3. Run /opsx-propose → generates proposal.md, specs/, design.md, tasks.md
+3. Run /ob-propose → generates proposal.md, specs/, design.md, tasks.md
 4. Show the plan: change name, total tasks, task list summary
 5. STOP. Ask user: "Ready to implement? (yes/no)", DO NOT proceed until confirmed.
 ```
@@ -287,7 +282,7 @@ devops-manager (ship mode)
 
 ```
 0. Run /quota to check remaining budget before spawning.
-1. Run /opsx-apply.
+1. Run /ob-apply.
    - Step 5b: classify cost tier, announce scope, ask user to confirm if ≥4 tasks.
    - Lead adds all tasks to board.
    - When dependencies exist, lead uses multiple `team_tasks_add` waves so later tasks can reference real task IDs returned by earlier waves.
@@ -331,20 +326,33 @@ When user says "I've added comments to the PR" or asks to fix PR comments from P
 
 ---
 
+## Tools
+
+**OpenSpec** manages the change lifecycle. Each work item becomes a change with a `proposal.md`, specs, and a `tasks.md` task board. Commands: `openspec new change`, `openspec status`, `openspec instructions apply`. Agents never implement without an active change — OpenSpec is the single source of truth for what is planned and what is done.
+
+**opencode-ensemble** handles parallel agent execution via git worktrees. Each spawned agent works in an isolated branch; the lead merges on completion. Core tools: `team_create`, `team_spawn`, `team_shutdown`, `team_merge`, `team_cleanup`, `team_tasks_add`, `team_tasks_list`, `team_claim`, `team_tasks_complete`, `team_message`, `team_results`, `team_status`. Live dashboard at `http://localhost:4747/`.
+
+---
+
 ## Agents
 
-All agents are universal, no project-specific knowledge. Platform and tech knowledge comes from skills.
+Agent files live in `.opencode/agents/`. The set is dynamic — users add specialists over time via `/ob-create-engineer`.
 
 | Agent | File | Role |
 |-------|------|------|
-| `devops-manager` | .opencode/agents/devops-manager.md | Reads work items, creates PRs, handles review feedback |
-| `basic-engineer` | .opencode/agents/basic-engineer.md | Generic implementation worker using ability-loaded skills |
+| `devops-manager` | `.opencode/agents/devops-manager.md` | Orchestrator. Reads work items, creates PRs, handles review feedback. Never writes application code. |
+| `basic-engineer` | `.opencode/agents/basic-engineer.md` | Fallback implementation worker. Used when no custom engineer matches the task domain. |
+| `*-engineer` | `.opencode/agents/*-engineer.md` | User-created specialists. Preferred over `basic-engineer` when their domain matches the task. |
 
-User can add more custom engineer agents and run them in parallel. Keep behavior ability-driven via skill mappings. Custom engineers are the primary specialization mechanism; `basic-engineer` is the general fallback when no custom engineer is a clear fit.
+Before spawning, inspect `.opencode/agents/` to build the actual list — never assume which custom engineers exist.
 
-Default `basic-engineer` abilities:
+---
 
-```
+## Abilities
+
+Every agent file declares an `## Abilities` section that maps roles to `@skill-name` references. This is how agents know what to load — skills deliver the rules, guardrails, and platform knowledge for each domain.
+
+```markdown
 ## Abilities
 - Guardrails: @ob-generic-guardrails, @ob-default
 - Development: @ob-default
@@ -352,145 +360,33 @@ Default `basic-engineer` abilities:
 - Infrastructure: @ob-default
 ```
 
+`@ob-generic-guardrails` is mandatory in every agent's Guardrails line. Custom engineers replace `@ob-default` with real installed skills.
+
+---
+
 ## Skills
 
-Skills provide platform and tech-specific knowledge. Agents usually detect and load them automatically. Prefer auto-detection, but explicitly naming a skill in a spawn prompt is allowed when a workflow requires it or repeated misses show the agent is not loading the right context.
+Skills live in `.agents/skills/`. Agents load them via `@skill-name` in their `## Abilities` section.
 
-`ob-global` is always loaded first, it provides baseline rules for all agents.
+Always installed: `@ob-default`, `@ob-generic-guardrails`, `@browser-automation`, `@opencode-ensemble`.
 
-Skills are located in `.agents/skills/`. Each skill has a `SKILL.md` with a description the agent reads to determine relevance.
-
-| Skill | Purpose |
-|-------|---------|
-| `ob-global` | Generic skill, baseline rules loaded by all agents. Context, source roots, git/secrets guardrails, token opt rules |
-| `ob-default` | Fallback skill, when no other skill matches |
-| `ob-generic-guardrails` | Minimal foundation for user guardrails skills |
-| `ob-userstory-az` | Parse Azure DevOps work item URL |
-| `ob-userstory-gh` | Parse GitHub Issue URL |
-| `ob-pullrequest-az` | Create PR on Azure DevOps |
-| `ob-pullrequest-gh` | Create PR on GitHub |
-| `openspec-propose` | Propose change artifacts (proposal, specs, tasks) |
-| `openspec-apply-change` | Implement change with agent team |
-| `openspec-archive-change` | Archive completed change |
-| `browser-automation` | Browser automation for localhost UI, screenshots, clicks, queries |
-
-Execution rules live in skills. Keep AGENTS.md focused on orchestration and routing.
+<!-- OB-PLATFORM-SKILLS-GUIDE-START -->
+<!-- OB-PLATFORM-SKILLS-GUIDE-END -->
 
 ---
 
-## Branch Naming
+## Optimizations
 
-Format: `feature/{issue-id}-{slug}`
-Example: `feature/42-add-user-auth`
+Active tools injected during onboarding. Empty sections mean that tool was not selected.
 
-When `## Source Roots` lists multiple roots, each root is an independent git repository. The same branch name must be created in every repo that will have changes. Git operations (`branch`, `commit`, `push`) run once per repository, there is no shared git history.
+<!-- OB-RTK-START -->
+<!-- OB-RTK-END -->
 
----
+<!-- OB-CAVEMAN-START -->
+<!-- OB-CAVEMAN-END -->
 
-## Project Structure
+<!-- OB-CODEGRAPH-START -->
+<!-- OB-CODEGRAPH-END -->
 
-```
-[project-root]/
-├── .agents/
-│   ├── agents/        # Agent definitions (universal, no project knowledge)
-│   │   ├── devops-manager.md
-│   │   ├── basic-engineer.md
-│   │   └── *-engineer.md   # optional, user-defined workers
-│   └── skills/      # Skills (platform/tech specific knowledge)
-│       ├── ob-global/              ← baseline skill, load first
-│       ├── ob-default/            ← fallback skill
-│       ├── ob-generic-guardrails/ ← foundation for user guardrails
-│       ├── ob-userstory-gh/
-│       ├── ob-userstory-az/
-│       └── browser-automation/
-├── openspec/
-│   ├── specs/
-│   └── changes/
-│       └── {change}/
-│           └── images/
-├── AGENTS.md
-├── ARCHITECTURE.md
-└── DESIGN.md
-```
-
----
-
-## Guardrails
-
-Guardrails are mandatory via `ob-global` and ability-loaded skills.
-
-Minimal non-negotiables:
-- Never commit or push to `main`.
-- Never force push.
-- Never expose or commit secrets.
-- Use `gh`/`az` CLI for platform operations.
-- In multi-repo source scope, run git operations per repository.
-
-### Config file conflict: `opencode.jsonc` vs `.opencode/opencode.json`
-
-This project uses `.opencode/opencode.json` as the single OpenCode configuration file. Some tools (e.g., codegraph) may create an `opencode.jsonc` file at the project root. **These two files cannot coexist.**
-
-If you detect both `opencode.jsonc` (project root) and `.opencode/opencode.json` exist:
-1. **Stop immediately** and warn the user: "Conflicting OpenCode config files detected. This project uses `.opencode/opencode.json` only. The root `opencode.jsonc` must be removed or its contents merged into `.opencode/opencode.json`."
-2. Do NOT proceed with any task until the conflict is resolved.
-3. If the user asks you to fix it: merge any `mcpServers` or other config from `opencode.jsonc` into `.opencode/opencode.json`, then delete `opencode.jsonc`.
-
----
-
-## Token Budget & Safety
-
-Prevent runaway token spend from unattended sessions. Apply in this priority order.
-
-### 1. Provider-side caps (primary safety layer)
-
-Set monthly soft-limit + hard usage cap in your provider dashboard **before** running any agent session:
-- **OpenAI**: [platform.openai.com/account/limits](https://platform.openai.com/account/limits)
-- **Anthropic**: [console.anthropic.com](https://console.anthropic.com)
-- **Google AI Studio**: [aistudio.google.com/app/usage](https://aistudio.google.com/app/usage)
-
-Provider caps are the only guarantees that survive agent bugs, infinite loops, or runaway retries.
-
-### 2. Model-cost routing
-
-| Task type | Model tier |
-|-----------|-----------|
-| Orchestration loops, task classification, status checks, PR parsing, triage | Fast / cheap (e.g. `haiku`, `gpt-4o-mini`) |
-| Implementation, code review, hard reasoning | Expensive (e.g. `sonnet`, `opus`, `gpt-4o`) |
-
-devops-manager orchestrates — use fast model for it. Engineers implement — use expensive model there only.
-
-### 3. Sequential-by-default concurrency
-
-Default: **1 agent at a time**. Set `{{MAX_CONCURRENT_AGENTS}}` to `1` unless tasks are provably independent and the user approves higher concurrency. More agents = more tokens burned in parallel; slow down unless scope justifies it.
-
-### 4. Retry limits
-
-Max **3 retries** per failing task. On the third failure:
-1. Shut down the stuck agent.
-2. Summarize what failed and why.
-3. Stop — wait for user guidance before retrying.
-
-Never silently retry indefinitely. Repeated failures = a design problem, not a retry problem.
-
-### 5. Inactivity and time cutoffs
-
-- **No commits after 10 minutes** of cumulative agent runtime → auto-stop, summarize blockers to user.
-- **Max 1 hour** total runtime per `/opsx-apply` session → stop and report at the limit, regardless of remaining tasks.
-
-### 6. Quota checkpoints
-
-Use the `opencode-quota` plugin (`/quota` command) to surface real-time token usage:
-- Run `/quota` at **session start** (before spawning any agents) and **after each agent wave**.
-- "When to stop" thresholds:
-  - **50% consumed** → review remaining scope; consider reducing
-  - **75% consumed** → pause; summarize completed work; ask user whether to continue
-  - **90% consumed** → stop immediately; ship what's done; open follow-up change for remainder
-
----
-
-## Communication Style
-
-Terse. Technical substance exact. Only fluff die.
-Drop: articles, filler, pleasantries, hedging.
-Fragments OK. Short synonyms. Code unchanged.
-Pattern: [thing] [action] [reason]. [next step].
+<!-- OB-MEMORY-START -->
+<!-- OB-MEMORY-END -->

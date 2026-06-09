@@ -1,5 +1,5 @@
 ---
-name: ob-userstory-az
+name: ob-userstory
 description: Parse Azure DevOps user story URL and create OpenSpec change. Use when user provides an Azure DevOps URL.
 license: MIT
 compatibility: Requires openspec CLI and Azure CLI.
@@ -152,7 +152,7 @@ https://dev.azure.com/{org}/{project}/_git/{repo}/pullrequest/{pr-id}
 **Change Created:** us-{id}-{slug}
 ```
 
-After outputting the above, the lead MUST run `/opsx-propose` to generate the proposal, specs, and tasks. After `/opsx-propose` completes, STOP and ask the user: **"Ready to implement? (yes/no)"**, do NOT proceed to `/opsx-apply` until confirmed.
+After outputting the above, the lead MUST run `/ob-propose` to generate the proposal, specs, and tasks. After `/ob-propose` completes, STOP and ask the user: **"Ready to implement? (yes/no)"**, do NOT proceed to `/ob-apply` until confirmed.
 
 ---
 
@@ -160,7 +160,7 @@ After outputting the above, the lead MUST run `/opsx-propose` to generate the pr
 
 - ✅ Parse Azure DevOps URL and create OpenSpec change
 - ✅ Use `az` CLI for all Azure DevOps operations
-- ✅ Always run `/opsx-propose` after parsing, never skip to implementation
-- ✅ Always stop and confirm with user after propose, before running `/opsx-apply`
+- ✅ Always run `/ob-propose` after parsing, never skip to implementation
+- ✅ Always stop and confirm with user after propose, before running `/ob-apply`
 - ❌ Browser MCP tools for Azure DevOps operations, FORBIDDEN
 - ❌ Jump to implementation without user confirmation, FORBIDDEN
