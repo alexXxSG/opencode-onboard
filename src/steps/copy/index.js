@@ -3,7 +3,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { copyContent } from '../../utils/copy.js'
 import { error, header, success } from '../../utils/exec.js'
-import { patchAgentGuidance, patchAgentsMd, patchConcurrency } from './agents.js'
+import { patchAgentGuidance, patchAgentsMd, patchArchiveCommand, patchConcurrency } from './agents.js'
 import { installSkills } from './skills.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -23,6 +23,7 @@ export async function copyContentStep(platform, ctx = {}) {
       roots: ctx.sourceRoots || [dest],
     }, { spaces: 2 })
     await patchAgentGuidance(platform)
+    await patchArchiveCommand(platform)
     await patchAgentsMd(ctx)
     await patchConcurrency(ctx)
     await installSkills(platform)

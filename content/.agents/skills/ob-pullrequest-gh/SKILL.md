@@ -39,7 +39,7 @@ Save to: `openspec/changes/{change-name}/images/{feature}.png`
 
 ```bash
 git add .
-git commit -m "feat(#{id}): {description}"
+git commit -m "feat({scope}): {description} (#{id})"
 git push origin feature/{id}-{slug}
 ```
 
@@ -48,8 +48,8 @@ git push origin feature/{id}-{slug}
 ```bash
 gh pr create \
   --base main \
-  --head feature/{id}-{slug} \
-  --title "feat(#{id}): {title}" \
+  --head feature/{slug} \
+  --title "feat({scope}): {title} (#{id})" \
   --body "{description}"
 ```
 
