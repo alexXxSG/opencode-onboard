@@ -6,7 +6,7 @@
    gh pr list --repo {owner}/{repo} --state merged --json title,url,mergedAt --jq 'sort_by(.mergedAt) | .[] | {name: .title, sourceRefName: .headRefName, mergedAt: .mergedAt}'
    ```
 
-   For each unarchived change, try to find a matching PR from the list of merged PRs, using the change ID and slug as search hints.
+   For each unarchived change from the list of unarchived changes (step 2), try to find a matching PR from the list of merged PRs (this step), using the change ID and slug as search hints.
 
    Handle PR matches:
    - No results → record as blocked: `no merged PR found`

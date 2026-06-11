@@ -6,7 +6,7 @@
    az repos pr list --repository {repo} --status completed --query "sort_by(@, &closedDate)[].{name:title,sourceRefName:sourceRefName,closedDate:closedDate}"
    ```
 
-   For each unarchived change, try to find a matching PR from the list of merged PRs, using the change ID and slug as search hints.
+   For each unarchived change from the list of unarchived changes (step 2), try to find a matching PR from the list of merged PRs (this step), using the change ID and slug as search hints.
 
    Handle PR matches:
    - No results → record as blocked: `no merged PR found`
@@ -22,11 +22,11 @@
    Sort `eligible` by `closedDate` ascending and display the ordered list. Include blocked items separately. Example:
 
    ```text
-   Unarchived changes, ordered by merge date (oldest first):
+   Unarchived changes, ordered by close date (oldest first):
 
-   1. us-195435-secure-external-lb-iap (merged 2026-05-15T09:22:00Z) <- OLDEST
-   2. us-195448-update-service-names-and-repo (merged 2026-05-18T11:44:00Z)
-   3. us-195462-update-ssl-certs-and-routing (merged 2026-05-20T14:32:00Z)
+   1. us-195435-secure-external-lb-iap (closed 2026-05-15T09:22:00Z) <- OLDEST
+   2. us-195448-update-service-names-and-repo (closed 2026-05-18T11:44:00Z)
+   3. us-195462-update-ssl-certs-and-routing (closed 2026-05-20T14:32:00Z)
 
    Blocked from archiving:
    - us-195499-some-change (no merged PR found)
