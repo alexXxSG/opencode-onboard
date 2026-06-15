@@ -1,9 +1,12 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": ["AGENTS.md"],
+  "instructions": [
+    "AGENTS.md"
+  ],
   "plugin": [
     "opencode-plugin-openspec@latest",
     "@different-ai/opencode-browser@latest",
+    "@mohak34/opencode-notifier@latest",
     "@hueyexe/opencode-ensemble@0.14.1"
   ]
 }
