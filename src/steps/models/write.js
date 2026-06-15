@@ -26,8 +26,8 @@ export async function writeModelsToConfigs({ planModel, buildModel, fastModel, c
     else delete modelsByAgent.plan
     if (buildModel) modelsByAgent.build = buildModel
     else delete modelsByAgent.build
-    if (fastModel) modelsByAgent.explore = fastModel
-    else delete modelsByAgent.explore
+    if (fastModel) modelsByAgent.fast = fastModel
+    else delete modelsByAgent.fast
 
     if (Object.keys(modelsByAgent).length > 0) ensemble.modelsByAgent = modelsByAgent
     else delete ensemble.modelsByAgent

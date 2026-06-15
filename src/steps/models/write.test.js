@@ -43,14 +43,14 @@ describe('writeModelsToConfigs()', () => {
     const ensemble = JSON.parse(fs.readFileSync(ensembleJsonPath, 'utf-8'))
     expect(ensemble.modelsByAgent.plan).toBe('plan-model')
     expect(ensemble.modelsByAgent.build).toBe('build-model')
-    expect(ensemble.modelsByAgent.explore).toBe('fast-model')
+    expect(ensemble.modelsByAgent.fast).toBe('fast-model')
   })
 
   it('removes model entries when null is passed', async () => {
     const opencodeJsonPath = path.join(opencodeDir, 'opencode.json')
     const ensembleJsonPath = path.join(opencodeDir, 'ensemble.json')
     fs.writeFileSync(opencodeJsonPath, JSON.stringify({ model: 'old-model', theme: 'dark' }, null, 2), 'utf-8')
-    fs.writeFileSync(ensembleJsonPath, JSON.stringify({ modelsByAgent: { plan: 'a', build: 'b', explore: 'c', keep: 'yes' } }, null, 2), 'utf-8')
+    fs.writeFileSync(ensembleJsonPath, JSON.stringify({ modelsByAgent: { plan: 'a', build: 'b', fast: 'c', keep: 'yes' } }, null, 2), 'utf-8')
 
     await writeModelsToConfigs({ planModel: null, buildModel: null, fastModel: null, cwd: tmpDir })
 

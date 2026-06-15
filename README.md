@@ -110,6 +110,7 @@ Custom slash commands are installed into `.opencode/commands/` and are available
 | `/ob-create-engineer <name> "<description>"` | Create a custom specialist engineer with skills auto-installed from [skills.sh](https://www.skills.sh/). |
 | `/ob-create-architecture` | Generate or regenerate `ARCHITECTURE.md` from the codebase. |
 | `/ob-create-design` | Generate or regenerate `DESIGN.md` from the design system. |
+| `/ob-model <tier> <model>` | Set the model for a tier (`plan`, `build`, `fast`) in `.opencode/ensemble.json`. Pass a model id or `current` for the active session model. |
 
 ---
 
