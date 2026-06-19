@@ -1,5 +1,3 @@
 /node_modules
 /.vscode
 /test
-
-.agents/source-roots.json
