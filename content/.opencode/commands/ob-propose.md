@@ -6,12 +6,11 @@ description: Parse a work item or idea and propose a change plan with enriched t
 
 Apply `## Optimizations` from AGENTS.md (RTK, codegraph, memory, etc.).
 
-**If a work item URL is provided** (GitHub Issue or Azure DevOps work item): load `@ob-userstory` skill and fetch the work item via CLI before continuing. Platform is set in `.opencode/opencode-onboard.json` `wizard.platform`. If platform is `none`, skip this step and work from direct user input.
 
-**Step 0 - Check for unarchived changes**
+**Step 0.a - Check for unarchived changes**
 
 Before proposing a new change, inspect `openspec/changes/` (ignore `openspec/changes/archive`).
-If any unarchived change (`us-{id}-{slug}`) folders exist, list them and warn the user with this exact prompt:
+**IMPORTANT**: If any folder (`us-{id}-{slug}`) exist in `openspec/changes/`, list them and warn the user with this exact prompt:
 
 ```text
 There are unarchived changes pending to be archived:
@@ -22,8 +21,13 @@ There are unarchived changes pending to be archived:
 Do you want to continue with the proposal or stop to archive the change first? [continue/stop]
 ```
 
-If the user answers `stop`, end the command without generating a proposal.
-If the user answers `continue`, proceed to the next step.
+Wait for the user to respond: 
+- If the user answers `stop`, end the command without generating a proposal.
+- If the user answers `continue`, proceed to the next step.
+
+**Step 0.b - Load proposal skill**
+
+**If a work item URL is provided** (GitHub Issue or Azure DevOps work item): load `@ob-userstory` skill and fetch the work item via CLI before continuing. Platform is set in `.opencode/opencode-onboard.json` `wizard.platform`. If platform is `none`, skip this step and work from direct user input.
 
 Load `@openspec-propose` skill and follow its instructions.
 
