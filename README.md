@@ -108,10 +108,10 @@ Custom slash commands are installed into `.opencode/commands/` and are available
 | `/ob-archive` | Archive a completed OpenSpec change. |
 | `/ob-main <task>` | Quick direct implementation — no OpenSpec, no waves, no PR. Just do it. |
 | `/ob-autopilot <feature or URL>` | Autonomous, no-confirmation pipeline: branch off `main`, then propose → apply → archive (one commit per phase), then merge back to `main`. For loop-engineering. |
-| `/ob-create-engineer <name> "<description>"` | Create a custom specialist engineer with skills auto-installed from [skills.sh](https://www.skills.sh/). |
+| `/ob-create-engineer <name> <tier> "<description>"` | Create a custom specialist engineer with skills auto-installed from [skills.sh](https://www.skills.sh/). Agent file is a template; tier variants are injected by the `ob-subagent-tiers` plugin at startup. |
 | `/ob-create-architecture` | Generate or regenerate `ARCHITECTURE.md` from the codebase. |
 | `/ob-create-design` | Generate or regenerate `DESIGN.md` from the design system. |
-| `/ob-set-model <tier> <model>` | Set the model for a tier (`plan`, `build`, `fast`) in `.opencode/opencode-onboard.json` (`wizard.models`) and re-stamp the engineers on that tier. Pass a model id or `current` for the active session model. |
+| `/ob-set-model [user] <tier> <model>` | Set the model for a tier (`plan`, `build`, `fast`). Writes to `opencode-onboard.json` (team) or `opencode-onboard.user.json` (user override, gitignored) when `user` prefix is used. Restart to pick up — the `ob-subagent-tiers` plugin rebuilds tier agents at startup. Pass a model id or `current` for the active session model. |
 
 ---
 

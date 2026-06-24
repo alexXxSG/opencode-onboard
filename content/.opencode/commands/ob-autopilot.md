@@ -34,7 +34,7 @@ Input: `$ARGUMENTS`
 
 **Phase 2 — Propose (no confirmation).**
 - Run the `/ob-propose` protocol with these overrides: **skip its Step 0 unarchived-changes prompt** (treat the answer as `continue`), do **not** pause at the enrichment checkpoint, and **skip the final "Stop / ask the user" step**. Enrich silently.
-- Load `@openspec-propose`, generate `proposal.md`, specs, and `tasks.md`, then annotate every task line with `<!-- agent, depends_on, touches -->` exactly as `/ob-propose` specifies (agent carries the model; `depends_on` mandatory; `touches` best-effort).
+- Load `@openspec-propose`, generate `proposal.md`, specs, and `tasks.md`, then annotate every task line with `<!-- agent, depends_on, touches -->` exactly as `/ob-propose` specifies (agent name includes tier suffix e.g. `backend-engineer.build`; `depends_on` mandatory; `touches` best-effort).
 - If the canonical change slug differs from `{slug}`, rename the branch to match: `git branch -m feature/{change-slug}` and refresh `BRANCH="$(git branch --show-current)"`.
 - Commit: `git add -A && git commit -m "propose: {title} ({change-id})"`.
 

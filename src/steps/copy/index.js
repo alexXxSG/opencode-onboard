@@ -19,8 +19,7 @@ export async function copyContentStep(platform, ctx = {}) {
   try {
     await copyContent(CONTENT_DIR, dest, platform, ctx)
 
-    const rootsFile = path.join(dest, ".agents", "source-roots.json")
-    await fse.ensureDir(path.dirname(rootsFile))
+    const rootsFile = path.join(dest, ".opencode", "source-roots.json")
     await fse.writeJson(
       rootsFile,
       {
@@ -29,10 +28,6 @@ export async function copyContentStep(platform, ctx = {}) {
       },
       { spaces: 2 },
     )
-
-    const ignoreFile = path.join(dest, ".agents", ".gitignore")
-    await fse.ensureDir(path.dirname(ignoreFile))
-    await fse.writeFile(ignoreFile, "source-roots.json\n")
 
     await patchAgentGuidance(platform)
     await patchArchiveCommand(platform)

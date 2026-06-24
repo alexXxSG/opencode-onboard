@@ -39,7 +39,7 @@ Greenfield note: `ARCHITECTURE.md` and `DESIGN.md` are left as placeholders. Run
 
 Scan the codebase for any existing documentation, changelogs, ADRs, README files, or notable history that describes decisions already made in this project. Create an OpenSpec archive entry that captures this history so agents have context going forward.
 
-Before scanning, load source roots from `.agents/source-roots.json` when present. Only scan those roots plus this repo's docs/config files.
+Before scanning, load source roots from `.opencode/source-roots.json` when present. Only scan those roots plus this repo's docs/config files.
 
 ```bash
 openspec new change "project-history"
