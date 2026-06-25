@@ -7,7 +7,7 @@ import { commandExists, error, info, loading, success, warn } from '../../utils/
  * Configures the basic-memory MCP server in .opencode/opencode.json
  * and installs the basic-memory skill.
  *
- * basic-memory runs via `uvx basic-memory mcp` (stdio, no Docker).
+ * basic-memory runs via `uv tool run basic-memory mcp` (stdio, no Docker).
  * Requires uv: https://docs.astral.sh/uv/getting-started/installation/
  * Skill source: https://github.com/basicmachines-co/basic-memory (skills/ directory)
  */
@@ -53,7 +53,7 @@ export async function installMemory(options = {}) {
     if (!opencode.mcp['basic-memory']) {
       opencode.mcp['basic-memory'] = {
         type: 'local',
-        command: ['uvx', 'basic-memory', 'mcp'],
+        command: ['uv', 'tool', 'run', 'basic-memory', 'mcp'],
         enabled: true,
         timeout: 300000,
       }

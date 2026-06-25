@@ -19,6 +19,9 @@
 // generated files, no git churn.  Restart opencode after /ob-set-model to
 // pick up model changes.
 
+import fs from "node:fs/promises"
+import path from "node:path"
+
 export const ObSubagentTiers = async ({ directory }) => {
   const root = directory || process.cwd()
 
@@ -26,7 +29,6 @@ export const ObSubagentTiers = async ({ directory }) => {
 
   async function readJson(filePath) {
     try {
-      const fs = await import("node:fs/promises")
       const raw = await fs.readFile(filePath, "utf-8")
       return JSON.parse(raw)
     } catch {
@@ -35,8 +37,8 @@ export const ObSubagentTiers = async ({ directory }) => {
   }
 
   async function resolveModels() {
-    const userPath = `${root}/.opencode/opencode-onboard.user.json`
-    const teamPath = `${root}/.opencode/opencode-onboard.json`
+    const userPath = path.join(root, ".opencode", "opencode-onboard.user.json")
+    const teamPath = path.join(root, ".opencode", "opencode-onboard.json")
 
     const user = await readJson(userPath)
     const team = await readJson(teamPath)
@@ -54,35 +56,44 @@ export const ObSubagentTiers = async ({ directory }) => {
 
   return {
     config: async (cfg) => {
-      try {
-        const models = await resolveModels()
-        const available = TIERS.filter((t) => models[t])
-        if (available.length === 0) return
-
-        cfg.agent = cfg.agent || {}
-
-        // Find all *-engineer agents in the config (loaded from .opencode/agents/*.md)
-        const engineerNames = Object.keys(cfg.agent).filter((name) =>
-          name.endsWith("-engineer")
-        )
-
-        for (const name of engineerNames) {
-          const template = cfg.agent[name]
-          if (!template) continue
-
-          for (const tier of available) {
-            const variantName = `${name}.${tier}`
-            // Shallow-clone the template (which has description, mode,
-            // permission, system/prompt, etc.) and stamp the model on top.
-            cfg.agent[variantName] = {
-              ...template,
-              model: models[tier],
-            }
-          }
-        }
-      } catch {
-        // never break the session over tier injection
+      const models = await resolveModels()
+      const available = TIERS.filter((t) => models[t])
+      if (available.length === 0) {
+        console.error("[ob-subagent-tiers] No tier models configured. Run /ob-set-model <tier> <model>.")
+        return
       }
+
+      cfg.agent = cfg.agent || {}
+
+      // Find all *-engineer agents in the config (loaded from .opencode/agents/*.md)
+      const engineerNames = Object.keys(cfg.agent).filter((name) =>
+        name.endsWith("-engineer")
+      )
+
+      if (engineerNames.length === 0) {
+        console.error("[ob-subagent-tiers] No *-engineer agents found in cfg.agent")
+        return
+      }
+
+      let injected = 0
+      for (const name of engineerNames) {
+        const template = cfg.agent[name]
+        if (!template) continue
+
+        for (const tier of available) {
+          const variantName = `${name}.${tier}`
+          // Shallow-clone the template (description, mode, permission, etc.)
+          // and stamp the model on top. cfg.agent entries use string model ids
+          // (e.g. "opencode/big-pickle") — the Agent layer parses them later.
+          cfg.agent[variantName] = {
+            ...template,
+            model: models[tier],
+          }
+          injected++
+        }
+      }
+
+      console.error(`[ob-subagent-tiers] Injected ${injected} tier variants for ${engineerNames.length} engineer(s)`)
     },
   }
 }
