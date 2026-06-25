@@ -55,7 +55,7 @@ export async function installMemory(options = {}) {
         type: 'local',
         command: ['uvx', 'basic-memory', 'mcp'],
         enabled: true,
-        timeout: 120000,
+        timeout: 300000,
       }
     }
 
@@ -73,7 +73,7 @@ export async function installMemory(options = {}) {
     const result = await execa(
       'npx',
       ['skills', 'add', 'basicmachines-co/basic-memory', '--path', 'skills', '--yes'],
-      { cwd: process.cwd(), reject: false, stdio: 'pipe', timeout: 120000 }
+      { cwd: process.cwd(), reject: false, stdio: 'pipe', timeout: 300000 }
     )
     if (result.exitCode === 0) {
       success('basic-memory skill installed')
