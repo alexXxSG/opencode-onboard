@@ -9,8 +9,10 @@ Apply `## Optimizations` from AGENTS.md (RTK, codegraph, memory, etc.).
 
 **Step 0.a - Check for unarchived changes**
 
-Before proposing a new change, inspect `openspec/changes/` (ignore `openspec/changes/archive`).
-**IMPORTANT**: If any folder (`us-{id}-{slug}`) exist in `openspec/changes/`, list them and warn the user with this exact prompt:
+**IMPORTANT**: Never skip this step. User must give a response before proceeding.
+
+Before proposing a new change, inspect `openspec/changes/` (ignore `openspec/changes/archive`). 
+If any folder (`us-{id}-{slug}`) exist in `openspec/changes/`, list them and warn the user with this exact prompt:
 
 ```text
 There are unarchived changes pending to be archived:
