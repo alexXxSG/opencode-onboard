@@ -29,13 +29,13 @@ Reference material:
    Use file tools to discover the architecture: `glob` for folder structure, `grep` for route/model/schema definitions, `read` config files, CI/CD workflows, Dockerfiles, README, changelogs, ADRs.
 
 <!-- OB-CMD-CODEGRAPH-START -->
-   Use codegraph MCP for code intelligence:
+   Use codegraph MCP tools (NOT CLI commands). Do NOT run `codegraph` in bash — use the MCP tools directly.
    - `codegraph_search` to find components, entry points, and module boundaries.
    - `codegraph_impact` to trace dependency chains between modules.
 <!-- OB-CMD-CODEGRAPH-END -->
 
 <!-- OB-CMD-MEMORY-START -->
-   Use basic-memory MCP for persistent context:
+   Use basic-memory MCP tools (NOT CLI commands). Do NOT run `basic-memory` in bash — use the MCP tools directly.
    - `search` for any prior architecture notes, ADRs, or decisions stored by previous runs or agents.
 <!-- OB-CMD-MEMORY-END -->
 
@@ -48,10 +48,10 @@ Reference material:
    - If nothing changed: report "Architecture unchanged since last update" and stop.
    - For each changed area, understand what's affected.
 <!-- OB-CMD-CODEGRAPH-START -->
-   - Use `codegraph_search` / `codegraph_impact` to understand what's affected.
+   - Use `codegraph_search` / `codegraph_impact` MCP tools to understand what's affected.
 <!-- OB-CMD-CODEGRAPH-END -->
 <!-- OB-CMD-MEMORY-START -->
-   - Use `basic-memory` `search` for the `architecture-summary` note from the previous run to compare.
+   - Use `basic-memory` `search` MCP tool for the `architecture-summary` note from the previous run.
 <!-- OB-CMD-MEMORY-END -->
    - Update only the affected sections. Preserve manually-added content in unchanged sections.
    - If the changes are too pervasive (more than ~40% of sections affected), fall back to **Generate mode**.
@@ -99,11 +99,10 @@ Reference material:
 4. **Store summary in basic-memory**
 
 <!-- OB-CMD-MEMORY-START -->
-   `write_note` with title `architecture-summary` containing:
+   `write_note` MCP tool with title `architecture-summary` containing:
    - The ISO timestamp of this run
    - A bullet list of top-level components found
    - Any key architectural decisions or risks identified
-   This lets future runs and other agents reference the last known state.
 <!-- OB-CMD-MEMORY-END -->
 
 5. **Report**

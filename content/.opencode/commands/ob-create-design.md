@@ -34,12 +34,12 @@ Examples from the spec repo:
    Use file tools to discover the design system: `glob` for CSS files, Tailwind config, PostCSS config, component files, design token definitions (JS/TS/JSON/YAML), theme files, UI framework config (shadcn, MUI, Chakra, etc.).
 
 <!-- OB-CMD-CODEGRAPH-START -->
-   Use codegraph MCP for code intelligence:
-   - `codegraph_search` to find component definitions, style utilities, and theme/token modules. Trace how design tokens flow into components.
+   Use codegraph MCP tools (NOT CLI commands). Do NOT run `codegraph` in bash — use the MCP tools directly.
+   - `codegraph_search` to find component definitions, style utilities, and theme/token modules.
 <!-- OB-CMD-CODEGRAPH-END -->
 
 <!-- OB-CMD-MEMORY-START -->
-   Use basic-memory MCP for persistent context:
+   Use basic-memory MCP tools (NOT CLI commands). Do NOT run `basic-memory` in bash — use the MCP tools directly.
    - `search` for any prior design notes or token summaries stored by previous runs.
 <!-- OB-CMD-MEMORY-END -->
 
@@ -52,10 +52,10 @@ Examples from the spec repo:
    - If nothing changed: report "Design system unchanged since last update" and stop.
    - For changed CSS/token/component files, understand what uses them.
 <!-- OB-CMD-CODEGRAPH-START -->
-   - Use `codegraph_search` to understand what uses changed design tokens.
+   - Use `codegraph_search` MCP tool to understand what uses changed design tokens.
 <!-- OB-CMD-CODEGRAPH-END -->
 <!-- OB-CMD-MEMORY-START -->
-   - Use `basic-memory` `search` for the `design-summary` note from the previous run to compare.
+   - Use `basic-memory` `search` MCP tool for the `design-summary` note from the previous run.
 <!-- OB-CMD-MEMORY-END -->
    - Update only the affected tokens and sections. Preserve manually-added content in unchanged sections.
    - If the changes are too pervasive (entire token system replaced), fall back to **Generate mode**.
@@ -76,10 +76,9 @@ Examples from the spec repo:
 4. **Store summary in basic-memory**
 
 <!-- OB-CMD-MEMORY-START -->
-   `write_note` with title `design-summary` containing:
+   `write_note` MCP tool with title `design-summary` containing:
    - The ISO timestamp of this run
    - Key design tokens found (color palette, fonts, spacing scale)
-   This lets future runs and other agents reference the last known state.
 <!-- OB-CMD-MEMORY-END -->
 
 5. **Report**

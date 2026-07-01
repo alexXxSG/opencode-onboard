@@ -14,12 +14,12 @@ Prefix all bash commands with `rtk` when RTK is enabled.
 Find the oldest unarchived OpenSpec change that has a completed PR, archive it, update docs, and open an archive PR. No input required.
 
 <!-- OB-CMD-CODEGRAPH-START -->
-Use codegraph MCP for code intelligence:
-- Use `codegraph_impact` when checking if the archived change's specs affect `ARCHITECTURE.md` or `DESIGN.md`. This identifies exactly which doc sections need updates instead of guessing.
+Use codegraph MCP tools (NOT CLI commands). Do NOT run `codegraph` in bash — use the MCP tools directly.
+- `codegraph_impact` when checking if the archived change's specs affect `ARCHITECTURE.md` or `DESIGN.md`.
 <!-- OB-CMD-CODEGRAPH-END -->
 
 <!-- OB-CMD-MEMORY-START -->
-Use basic-memory MCP for persistent context:
+Use basic-memory MCP tools (NOT CLI commands). Do NOT run `basic-memory` in bash — use the MCP tools directly.
 - `search` for the `change-{slug}-context` note and any `task-<id>-result` notes from the change being archived.
 - `write_note` with title `archive-{slug}` summarizing what was archived, what docs changed, and the archive PR link.
 <!-- OB-CMD-MEMORY-END -->

@@ -33,13 +33,13 @@ Wait for the user to respond:
 **Step 0.b - Load exploration context**
 
 <!-- OB-CMD-CODEGRAPH-START -->
-Use codegraph MCP for code intelligence:
-- Use `codegraph_search` to understand the codebase structure relevant to the user's idea. This gives you real symbol-level context instead of guessing from file names.
+Use codegraph MCP tools (NOT CLI commands). Do NOT run `codegraph` in bash — use the MCP tools directly: `codegraph_search`, `codegraph_impact`, `codegraph_callers`, `codegraph_callees`, `codegraph_node`.
+- `codegraph_search` to understand the codebase structure relevant to the user's idea.
 <!-- OB-CMD-CODEGRAPH-END -->
 
 <!-- OB-CMD-MEMORY-START -->
-Use basic-memory MCP for persistent context:
-- `search` for any prior exploration notes, decisions, or context related to the user's topic. Past explorations may have uncovered constraints or insights worth carrying forward.
+Use basic-memory MCP tools (NOT CLI commands). Do NOT run `basic-memory` in bash — use the MCP tools directly: `write_note`, `edit_note`, `search`, `build_context`, `recent_activity`.
+- `search` for any prior exploration notes, decisions, or context related to the user's topic.
 <!-- OB-CMD-MEMORY-END -->
 
 **Step 0.c - Load exploration skill**
@@ -48,5 +48,5 @@ Load `@openspec-explore` skill and follow its instructions.
 
 <!-- OB-CMD-MEMORY-START -->
 After exploration:
-- `write_note` with title `exploration-{topic}` summarizing the key findings, constraints, and recommended next steps. This lets future `/ob-propose` or `/ob-explore` runs pick up where you left off.
+- `write_note` with title `exploration-{topic}` summarizing the key findings, constraints, and recommended next steps.
 <!-- OB-CMD-MEMORY-END -->

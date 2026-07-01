@@ -18,11 +18,11 @@ Prefix all bash commands with `rtk` when RTK is enabled.
 - Use Read/Glob/Grep to locate relevant files before editing
 
 <!-- OB-CMD-CODEGRAPH-START -->
-- Use codegraph MCP `codegraph_search` to locate relevant symbols and understand the code structure before editing — faster and more accurate than blind grep.
+- Use codegraph MCP tools (NOT CLI commands). Do NOT run `codegraph` in bash. Use `codegraph_search` MCP tool to locate relevant symbols and understand the code structure before editing.
 <!-- OB-CMD-CODEGRAPH-END -->
 
 <!-- OB-CMD-MEMORY-START -->
-- Use basic-memory MCP `search` for any prior context notes relevant to the area you're working in.
+- Use basic-memory MCP `search` tool (NOT CLI) for any prior context notes relevant to the area you're working in.
 <!-- OB-CMD-MEMORY-END -->
 
 - After editing, run `pnpm run typecheck` to catch type errors; fix any that are caused by your changes

@@ -39,14 +39,14 @@ Load `@openspec-propose` skill and follow its instructions.
 > ⚠️ **CHECKPOINT — `tasks.md` was just written. STOP. Do NOT show the plan yet. You MUST complete the enrichment below before continuing. Skipping this breaks `/ob-apply`.**
 
 <!-- OB-CMD-CODEGRAPH-START -->
-Use codegraph MCP for code intelligence:
-- Use `codegraph_search` to understand the real file/symbol landscape for the proposed tasks.
-- Use `codegraph_impact` to trace which files each task truly affects — this makes `touches` annotations accurate instead of guessed.
+Use codegraph MCP tools (NOT CLI commands). Do NOT run `codegraph` in bash — use the MCP tools directly.
+- `codegraph_search` to understand the real file/symbol landscape for the proposed tasks.
+- `codegraph_impact` to trace which files each task truly affects — this makes `touches` annotations accurate.
 <!-- OB-CMD-CODEGRAPH-END -->
 
 <!-- OB-CMD-MEMORY-START -->
-Use basic-memory MCP for persistent context:
-- `search` for any prior exploration notes or decisions related to this change that `/ob-explore` may have stored.
+Use basic-memory MCP tools (NOT CLI commands). Do NOT run `basic-memory` in bash — use the MCP tools directly.
+- `search` for any prior exploration notes or decisions related to this change.
 - Write the proposal context to a `change-{slug}-context` note so `/ob-apply` can pick it up for subagent spawns.
 <!-- OB-CMD-MEMORY-END -->
 
@@ -79,7 +79,7 @@ Example result (note same-file tasks like 1.1/1.2 share `touches`, so `/ob-apply
 - [ ] 4.1 Run typecheck and fix errors <!-- agent: basic-engineer.fast, depends_on: [2.1,3.1], touches: [] -->
 ```
 
-`/ob-apply` reads these annotations to build conflict-free waves: `depends_on` gates ordering, `touches` keeps concurrent agents file-disjoint, and the tier suffix in `agent` determines the model (resolved at startup by the `ob-subagent-tiers` plugin). **`depends_on` is mandatory; `touches` is a best-effort hint** that codegraph impact refines at apply time.
+`/ob-apply` reads these annotations to build conflict-free waves: `depends_on` gates ordering, `touches` keeps concurrent agents file-disjoint, and the tier suffix in `agent` determines the model (resolved at startup by the `ob-subagent-tiers` plugin). **`depends_on` is mandatory; `touches` is a best-effort hint** that codegraph MCP tools refine at apply time.
 
 **After enrichment, show the plan:** change name, total task count, full task list with agent (including tier suffix) and dependency annotations.
 

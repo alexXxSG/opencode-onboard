@@ -34,13 +34,13 @@ Prefix all bash commands with `rtk` when RTK is enabled.
    Use file tools to discover constraints: `read` the documents above, `grep` for lint/formatter config rules.
 
 <!-- OB-CMD-CODEGRAPH-START -->
-   Use codegraph MCP for code intelligence:
+   Use codegraph MCP tools (NOT CLI commands). Do NOT run `codegraph` in bash — use the MCP tools directly.
    - `codegraph_search` to find module boundaries, forbidden cross-imports, and dependency violations.
    - `codegraph_impact` to understand which modules are coupled.
 <!-- OB-CMD-CODEGRAPH-END -->
 
 <!-- OB-CMD-MEMORY-START -->
-   Use basic-memory MCP for persistent context:
+   Use basic-memory MCP tools (NOT CLI commands). Do NOT run `basic-memory` in bash — use the MCP tools directly.
    - `search` for any prior `guardrails-summary` note from a previous run.
 <!-- OB-CMD-MEMORY-END -->
 
@@ -53,10 +53,10 @@ Prefix all bash commands with `rtk` when RTK is enabled.
    - Run `git log --oneline --since="<date>" -- <config files, lint configs, CI workflows}` to find what convention/config files changed.
    - If nothing changed: report "Guardrails up to date" and stop.
 <!-- OB-CMD-CODEGRAPH-START -->
-   - Use `codegraph_search` to check if module boundaries or import patterns changed.
+   - Use `codegraph_search` MCP tool to check if module boundaries or import patterns changed.
 <!-- OB-CMD-CODEGRAPH-END -->
 <!-- OB-CMD-MEMORY-START -->
-   - Use `basic-memory` `search` for the `guardrails-summary` note from the previous run to compare.
+   - Use `basic-memory` `search` MCP tool for the `guardrails-summary` note from the previous run.
 <!-- OB-CMD-MEMORY-END -->
    - Update only the affected rule categories. Preserve manually-added rules in unchanged categories.
    - If changes are pervasive (new architecture, new framework, new platform), fall back to **Generate mode**.
@@ -65,7 +65,7 @@ Prefix all bash commands with `rtk` when RTK is enabled.
 
    From the documents and code graph analysis, extract concrete, actionable rules in these categories. Only include a category if you found real evidence for it:
 
-   - **Architecture constraints** — layer boundaries, module dependencies, forbidden imports, directory ownership rules (e.g. "src/api/ must not import from src/ui/"). Use codegraph to verify actual import boundaries.
+   - **Architecture constraints** — layer boundaries, module dependencies, forbidden imports, directory ownership rules (e.g. "src/api/ must not import from src/ui/"). Use codegraph MCP tools to verify actual import boundaries.
    - **Naming conventions** — file naming, component naming, API route conventions, branch naming
    - **Code style** — formatter config, lint rules, import ordering, max line length — derive from actual config files, not guesses
    - **Testing rules** — test file locations, naming, coverage gates, what must be tested before merge
@@ -142,10 +142,9 @@ Prefix all bash commands with `rtk` when RTK is enabled.
 6. **Store summary in basic-memory**
 
 <!-- OB-CMD-MEMORY-START -->
-   `write_note` with title `guardrails-summary` containing:
+   `write_note` MCP tool with title `guardrails-summary` containing:
    - The ISO timestamp of this run
    - Number of rules per category
-   This lets future runs compare and incrementally update.
 <!-- OB-CMD-MEMORY-END -->
 
 7. **Report**

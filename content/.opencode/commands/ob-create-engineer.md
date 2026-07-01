@@ -25,7 +25,7 @@ Example: `/ob-create-engineer frontend-engineer build "A frontend engineer speci
    Based on the description and the project context (read ARCHITECTURE.md, DESIGN.md), search for relevant skills.
 
 <!-- OB-CMD-CODEGRAPH-START -->
-   Use codegraph MCP `codegraph_search` to identify which code areas, modules, and frameworks the new engineer will work with. This helps match skills to the actual tech stack.
+   Use codegraph MCP tools (NOT CLI commands). Do NOT run `codegraph` in bash. Use `codegraph_search` MCP tool to identify which code areas, modules, and frameworks the new engineer will work with.
 <!-- OB-CMD-CODEGRAPH-END -->
 
    ```bash
